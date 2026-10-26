@@ -1,13 +1,16 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/async_view.dart';
+import '../../../shared/widgets/ui.dart';
 import '../../auth/application/session_controller.dart';
 import '../application/customer_providers.dart';
 import '../domain/restaurant.dart';
+import 'widgets/promo_carousel.dart';
+import 'widgets/restaurant_cards.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -25,186 +28,288 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
+  Future<void> _refresh() async {
+    ref.invalidate(promosProvider);
+    ref.invalidate(restaurantsProvider);
+    await ref.read(restaurantsProvider.future);
+  }
+
+  void _openRestaurant(Restaurant r) => context.push('/c/restaurant/${r.id}', extra: r);
+
   @override
   Widget build(BuildContext context) {
     final restaurants = ref.watch(restaurantsProvider);
+    final cuisine = ref.watch(selectedCuisineProvider);
     final name = ref.watch(sessionControllerProvider).value?.name?.split(' ').first;
 
     return Scaffold(
       body: SafeArea(
+        bottom: false,
         child: RefreshIndicator(
-          onRefresh: () async => ref.refresh(restaurantsProvider.future),
+          color: AppColors.violet,
+          onRefresh: _refresh,
           child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
+              // ── Header ──────────────────────────────────
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+                  child: Row(
                     children: [
-                      Text('Hello, ${name ?? 'there'}',
-                          style: Theme.of(context).textTheme.headlineMedium),
-                      const Text('What are you craving today?',
-                          style: TextStyle(color: AppColors.inkMuted)),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _search,
-                        textInputAction: TextInputAction.search,
-                        decoration: InputDecoration(
-                          hintText: 'Search restaurants, cities, cuisines',
-                          prefixIcon: const Icon(Icons.search),
-                          suffixIcon: _search.text.isEmpty
-                              ? null
-                              : IconButton(
-                                  icon: const Icon(Icons.close),
-                                  onPressed: () {
-                                    _search.clear();
-                                    ref.read(restaurantQueryProvider.notifier).set('');
-                                    setState(() {});
-                                  },
-                                ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(_greeting(), style: const TextStyle(color: AppColors.inkMuted, fontSize: 14, fontWeight: FontWeight.w600)),
+                            Text('${name == null ? 'Hungry?' : 'Hi, $name'} 👋',
+                                maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.headlineMedium),
+                          ],
                         ),
-                        onChanged: (_) => setState(() {}),
-                        onSubmitted: (v) => ref.read(restaurantQueryProvider.notifier).set(v),
                       ),
+                      IconButton.filledTonal(
+                        onPressed: () => context.push('/c/favorites'),
+                        style: IconButton.styleFrom(backgroundColor: Colors.white),
+                        icon: const Icon(Icons.favorite_border_rounded, color: AppColors.violet),
+                        tooltip: 'Favourites',
+                      ),
+                      const SizedBox(width: 4),
+                      Consumer(builder: (context, ref, _) {
+                        final count = ref.watch(cartProvider.select((c) => c.itemCount));
+                        return IconButton.filledTonal(
+                          onPressed: () => context.push('/c/cart'),
+                          style: IconButton.styleFrom(backgroundColor: Colors.white),
+                          icon: Badge(
+                            isLabelVisible: count > 0,
+                            label: Text('$count'),
+                            backgroundColor: AppColors.mango,
+                            textColor: AppColors.ink,
+                            child: const Icon(Icons.shopping_bag_outlined, color: AppColors.violet),
+                          ),
+                          tooltip: 'Cart',
+                        );
+                      }),
                     ],
                   ),
                 ),
               ),
-              restaurants.when(
-                loading: () => const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (e, _) => SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: ErrorView(message: '$e', onRetry: () => ref.invalidate(restaurantsProvider)),
-                ),
-                data: (list) => list.isEmpty
-                    ? const SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: EmptyView(
-                          icon: Icons.storefront_outlined,
-                          title: 'No restaurants found',
-                          subtitle: 'Try a different search.',
+
+              // ── Search ──────────────────────────────────
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                      boxShadow: AppShadows.card,
+                    ),
+                    child: TextField(
+                      controller: _search,
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        hintText: 'Search restaurants or cuisines',
+                        prefixIcon: const Icon(Icons.search_rounded, color: AppColors.inkMuted),
+                        suffixIcon: ListenableBuilder(
+                          listenable: _search,
+                          builder: (_, _) => _search.text.isEmpty
+                              ? const SizedBox.shrink()
+                              : IconButton(
+                                  icon: const Icon(Icons.close_rounded),
+                                  onPressed: () {
+                                    _search.clear();
+                                    ref.read(restaurantQueryProvider.notifier).set('');
+                                  },
+                                ),
                         ),
-                      )
-                    : SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                        sliver: SliverList.separated(
-                          itemCount: list.length,
-                          separatorBuilder: (_, _) => const SizedBox(height: 14),
-                          itemBuilder: (_, i) => RestaurantCard(
-                            restaurant: list[i],
-                            onTap: () => context.push('/c/restaurant/${list[i].id}'),
-                          ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
+                          borderSide: BorderSide.none,
                         ),
                       ),
+                      onSubmitted: (v) => ref.read(restaurantQueryProvider.notifier).set(v),
+                    ),
+                  ),
+                ),
               ),
+
+              // ── Promos ──────────────────────────────────
+              SliverToBoxAdapter(
+                child: ref.watch(promosProvider).when(
+                      data: (promos) => PromoCarousel(promos: promos),
+                      loading: () => const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Skeleton(height: 184, radius: AppRadius.lg),
+                      ),
+                      // Promos are decoration: if they fail, show the brand banner.
+                      error: (_, _) => const PromoCarousel(promos: []),
+                    ),
+              ),
+
+              ...restaurants.when(
+                loading: () => [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                      child: Column(
+                        children: const [
+                          RestaurantCardSkeleton(),
+                          SizedBox(height: 16),
+                          RestaurantCardSkeleton(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                error: (e, _) => [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: ErrorView(message: '$e', onRetry: () => ref.invalidate(restaurantsProvider)),
+                  ),
+                ],
+                data: (all) => _content(all, cuisine),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 28)),
             ],
           ),
         ),
       ),
     );
   }
-}
 
-class RestaurantCard extends StatelessWidget {
-  const RestaurantCard({super.key, required this.restaurant, required this.onTap});
+  List<Widget> _content(List<Restaurant> all, String? cuisine) {
+    if (all.isEmpty) {
+      return [
+        const SliverFillRemaining(
+          hasScrollBody: false,
+          child: EmptyView(
+            icon: Icons.storefront_outlined,
+            title: 'No restaurants found',
+            subtitle: 'Try a different search, or check back soon.',
+          ),
+        ),
+      ];
+    }
 
-  final Restaurant restaurant;
-  final VoidCallback onTap;
+    final cuisines = {
+      for (final r in all)
+        if (r.type?.trim().isNotEmpty == true) r.type!.trim(),
+    }.toList()
+      ..sort();
 
-  @override
-  Widget build(BuildContext context) {
-    final r = restaurant;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AspectRatio(
-              aspectRatio: 16 / 7,
-              child: Stack(
-                fit: StackFit.expand,
+    final filtered = cuisine == null ? all : all.where((r) => r.type?.trim() == cuisine).toList();
+    final popular = ([...all]..sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0))).take(6).toList();
+    final showPopular = cuisine == null && ref.read(restaurantQueryProvider).trim().isEmpty && popular.length > 1;
+
+    return [
+      if (cuisines.length > 1)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 22),
+            child: SizedBox(
+              height: 42,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 children: [
-                  _Photo(url: r.imageUrl, fallbackLabel: r.name),
-                  if (r.rating != null)
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.star_rounded, size: 16, color: AppColors.mango),
-                            const SizedBox(width: 2),
-                            Text(r.rating!.toStringAsFixed(1),
-                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                          ],
-                        ),
-                      ),
+                  _CuisineChip(
+                    label: 'All',
+                    selected: cuisine == null,
+                    onTap: () => ref.read(selectedCuisineProvider.notifier).set(null),
+                  ),
+                  for (final c in cuisines)
+                    _CuisineChip(
+                      label: c,
+                      selected: cuisine == c,
+                      onTap: () => ref.read(selectedCuisineProvider.notifier).set(c),
                     ),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(r.name, style: Theme.of(context).textTheme.titleMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 2),
-                  Text(
-                    [r.type, r.location].whereType<String>().where((s) => s.isNotEmpty).join('  ·  '),
-                    style: const TextStyle(color: AppColors.inkMuted, fontSize: 13),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
+      if (showPopular) ...[
+        const SliverToBoxAdapter(child: SectionHeader(title: 'Popular near you')),
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: 226,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              itemCount: popular.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 14),
+              itemBuilder: (_, i) => RestaurantMiniCard(restaurant: popular[i], onTap: () => _openRestaurant(popular[i])),
+            ),
+          ),
+        ),
+      ],
+      SliverToBoxAdapter(
+        child: SectionHeader(title: cuisine ?? 'All restaurants'),
       ),
-    );
+      if (filtered.isEmpty)
+        const SliverToBoxAdapter(
+          child: EmptyView(icon: Icons.search_off_rounded, title: 'Nothing here yet', subtitle: 'Try another cuisine.'),
+        )
+      else
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          sliver: SliverList.separated(
+            itemCount: filtered.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 16),
+            itemBuilder: (_, i) => RestaurantCard(restaurant: filtered[i], onTap: () => _openRestaurant(filtered[i])),
+          ),
+        ),
+    ];
+  }
+
+  String _greeting() {
+    final h = DateTime.now().hour;
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
   }
 }
 
-/// Network image with initials as a fallback, so a missing photo never leaves a hole.
-class _Photo extends StatelessWidget {
-  const _Photo({required this.url, required this.fallbackLabel});
+class _CuisineChip extends StatelessWidget {
+  const _CuisineChip({required this.label, required this.selected, required this.onTap});
 
-  final String? url;
-  final String fallbackLabel;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final initials = fallbackLabel
-        .split(' ')
-        .where((w) => w.isNotEmpty)
-        .take(2)
-        .map((w) => w[0])
-        .join()
-        .toUpperCase();
-    final fallback = Container(
-      color: AppColors.violetDeep,
-      alignment: Alignment.center,
-      child: Text(initials, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800)),
-    );
-    if (url == null || url!.isEmpty) return fallback;
-    return CachedNetworkImage(
-      imageUrl: url!,
-      fit: BoxFit.cover,
-      placeholder: (_, _) => Container(color: AppColors.violetSoft),
-      errorWidget: (_, _, _) => fallback,
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.violet : Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: selected ? null : AppShadows.card,
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(30),
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            child: Center(
+              child: Text(label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.5,
+                    color: selected ? Colors.white : AppColors.ink,
+                  )),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

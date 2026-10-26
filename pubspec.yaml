@@ -44,6 +44,11 @@ dependencies:
   url_launcher: ^6.3.3
   geolocator: ^14.1.2
   image_picker: ^1.2.4
+  google_fonts: ^6.3.0
+  shimmer: ^4.0.0
+  webview_flutter: ^4.14.1
+  flutter_animate: ^4.5.2
+  geocoding: ^5.0.0
 
 dev_dependencies:
   flutter_test:

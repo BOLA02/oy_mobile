@@ -43,9 +43,23 @@ The rider dashboard returns display strings (`id: "ORD-12"`, `payout: "₦1,200"
 
 ## Status
 
-Done: auth for both roles, restaurant browse + search, menu, cart, rider dashboard with shift toggle,
-location pings and accept/decline/complete.
+**Customer** (all against the existing backend, no backend changes needed):
+sign up / log in, browse and search restaurants, cuisine filters, promo carousel, favourites,
+menu with category tabs and add-to-cart sheet, cart (single restaurant, minimum-order rule),
+checkout (saved or pinned address, live delivery-fee quote, cash or Paystack), payment confirmation,
+order history, order tracking with progress timeline, rider details and distance, cancel, review,
+saved addresses.
 
-Next: checkout (delivery quote, cash + Paystack), order history and live tracking, rider socket
-(`NEW_DELIVERY_REQUEST`) instead of polling, earnings and wallet, push notifications, chat, fonts
-(Inter + Baloo 2) and the web's brand polish.
+**Rider:** register (ID upload) and log in, dashboard, online/offline shift, location pings,
+accept / decline / complete deliveries.
+
+Next: rider socket (`NEW_DELIVERY_REQUEST`) instead of polling, rider earnings and wallet,
+push notifications (needs a small backend addition), chat/support, map view for tracking.
+
+## Notes
+
+- Fonts (Inter, Baloo 2) are fetched by `google_fonts` the first time the app runs online and cached.
+- Paystack opens in an in-app web view; the redirect is intercepted and the payment is then
+  confirmed with the server (`/orders/verify-payment/:reference`), never trusted from the redirect.
+- The delivery fee shown at checkout is the server's quote; the server prices the order itself.
+- `test/fonts` holds Roboto for widget tests only.

@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/async_view.dart';
 import '../../../shared/widgets/cta_button.dart';
+import '../../../shared/widgets/ui.dart';
 import '../application/location_reporter.dart';
 import '../application/rider_providers.dart';
 import '../domain/rider_dashboard.dart';
@@ -51,6 +53,7 @@ class _RiderDashboardScreenState extends ConsumerState<RiderDashboardScreen> {
   }
 
   Future<void> _toggleShift() => _run(() async {
+        HapticFeedback.mediumImpact();
         final repo = ref.read(riderRepositoryProvider);
         final reporter = ref.read(locationReporterProvider);
         final online = await repo.toggleShift();
@@ -70,75 +73,167 @@ class _RiderDashboardScreenState extends ConsumerState<RiderDashboardScreen> {
     _syncPolling(dash.value?.isOnline ?? false);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard')),
-      body: dash.whenView(
-        onRetry: () => ref.invalidate(riderDashboardProvider),
-        data: (d) => RefreshIndicator(
-          onRefresh: () async => ref.refresh(riderDashboardProvider.future),
-          child: ListView(
+      body: SafeArea(
+        child: dash.when(
+          loading: () => ListView(
             padding: const EdgeInsets.all(20),
-            children: [
-              Text('Hi ${d.firstName.isEmpty ? 'rider' : d.firstName}',
-                  style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height: 12),
-              if (!d.isApproved)
-                const _Banner(
-                  icon: Icons.hourglass_top_rounded,
-                  text: 'Your account is awaiting verification. You can accept deliveries once approved.',
-                ),
-              Card(
-                child: SwitchListTile(
-                  title: Text(d.isOnline ? 'You are online' : 'You are offline',
-                      style: const TextStyle(fontWeight: FontWeight.w700)),
-                  subtitle: Text(d.isOnline ? 'Waiting for delivery offers' : 'Go online to receive orders'),
-                  value: d.isOnline,
-                  onChanged: _busy ? null : (_) => _toggleShift(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(child: _Stat(label: 'Today', value: d.todayEarnings)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _Stat(label: 'Deliveries', value: '${d.completedToday}')),
-                ],
-              ),
-              const SizedBox(height: 20),
-              if (d.activeDelivery != null)
-                _DeliveryCard(
-                  delivery: d.activeDelivery!,
-                  busy: _busy,
-                  canAccept: d.isApproved && d.isOnline,
-                  onAccept: () => _run(() => ref.read(riderRepositoryProvider).accept(d.activeDelivery!.orderId)),
-                  onDecline: () => _run(() => ref.read(riderRepositoryProvider).decline(d.activeDelivery!.orderId)),
-                  onComplete: () => _run(() => ref.read(riderRepositoryProvider).complete(d.activeDelivery!.orderId)),
-                )
-              else
-                const Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(20),
-                    child: EmptyView(
-                      icon: Icons.two_wheeler,
-                      title: 'No delivery right now',
-                      subtitle: 'New offers appear here when you are online.',
-                    ),
-                  ),
-                ),
-              if (d.recentDeliveries.isNotEmpty) ...[
-                const SizedBox(height: 24),
-                Text('Recent deliveries', style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 8),
-                for (final r in d.recentDeliveries)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(r.restaurant),
-                    subtitle: Text(r.time),
-                    trailing: Text(r.payout, style: const TextStyle(fontWeight: FontWeight.w700)),
-                  ),
-              ],
+            children: const [
+              Skeleton(height: 140, radius: AppRadius.lg),
+              SizedBox(height: 16),
+              Skeleton(height: 84, radius: AppRadius.lg),
+              SizedBox(height: 16),
+              Skeleton(height: 200, radius: AppRadius.lg),
             ],
           ),
+          error: (e, _) => ErrorView(message: '$e', onRetry: () => ref.invalidate(riderDashboardProvider)),
+          data: (d) => RefreshIndicator(
+            color: AppColors.violet,
+            onRefresh: () async {
+              ref.invalidate(riderDashboardProvider);
+              await ref.read(riderDashboardProvider.future);
+            },
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+              children: [
+                Text('Hi ${d.firstName.isEmpty ? 'rider' : d.firstName} 👋', style: Theme.of(context).textTheme.headlineMedium),
+                const SizedBox(height: 14),
+                _EarningsHero(earnings: d.todayEarnings, deliveries: d.completedToday),
+                const SizedBox(height: 16),
+                if (!d.isApproved)
+                  const _Banner(
+                    icon: Icons.hourglass_top_rounded,
+                    text: 'Your account is awaiting verification. You can accept deliveries once approved.',
+                  ),
+                _ShiftCard(online: d.isOnline, busy: _busy, onToggle: _toggleShift),
+                const SizedBox(height: 22),
+                Text(d.activeDelivery?.isAccepted == true ? 'Current delivery' : 'Delivery offers',
+                    style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 12),
+                if (d.activeDelivery != null)
+                  _DeliveryCard(
+                    delivery: d.activeDelivery!,
+                    busy: _busy,
+                    canAccept: d.isApproved && d.isOnline,
+                    onAccept: () => _run(() => ref.read(riderRepositoryProvider).accept(d.activeDelivery!.orderId)),
+                    onDecline: () => _run(() => ref.read(riderRepositoryProvider).decline(d.activeDelivery!.orderId)),
+                    onComplete: () => _run(() => ref.read(riderRepositoryProvider).complete(d.activeDelivery!.orderId)),
+                  )
+                else
+                  SurfaceCard(
+                    child: EmptyView(
+                      icon: d.isOnline ? Icons.radar_rounded : Icons.power_settings_new_rounded,
+                      title: d.isOnline ? 'Looking for deliveries…' : 'You are offline',
+                      subtitle: d.isOnline ? 'New offers appear here as soon as a restaurant is ready.' : 'Go online to start receiving offers.',
+                    ),
+                  ),
+                if (d.recentDeliveries.isNotEmpty) ...[
+                  const SizedBox(height: 26),
+                  Text('Recent deliveries', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 12),
+                  SurfaceCard(
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      children: [
+                        for (var i = 0; i < d.recentDeliveries.length; i++) ...[
+                          if (i > 0) const Divider(indent: 16, endIndent: 16),
+                          ListTile(
+                            leading: const CircleAvatar(backgroundColor: AppColors.successSoft, child: Icon(Icons.check_rounded, color: AppColors.success)),
+                            title: Text(d.recentDeliveries[i].restaurant, style: const TextStyle(fontWeight: FontWeight.w700)),
+                            subtitle: Text(d.recentDeliveries[i].time),
+                            trailing: Text(d.recentDeliveries[i].payout, style: const TextStyle(fontWeight: FontWeight.w800)),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _EarningsHero extends StatelessWidget {
+  const _EarningsHero({required this.earnings, required this.deliveries});
+
+  final String earnings;
+  final int deliveries;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        gradient: AppColors.brandGradient,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        boxShadow: AppShadows.card,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Today's earnings", style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text(earnings, style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: Colors.white)),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(AppRadius.md)),
+            child: Column(
+              children: [
+                Text('$deliveries', style: const TextStyle(color: AppColors.mango, fontSize: 24, fontWeight: FontWeight.w800)),
+                Text('deliveries', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShiftCard extends StatelessWidget {
+  const _ShiftCard({required this.online, required this.busy, required this.onToggle});
+
+  final bool online;
+  final bool busy;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    return SurfaceCard(
+      child: Row(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: online ? AppColors.successSoft : AppColors.violetSoft,
+            ),
+            child: Icon(Icons.two_wheeler_rounded, color: online ? AppColors.success : AppColors.violet),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(online ? "You're online" : "You're offline", style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                Text(online ? 'Sharing your location' : 'Go online to receive orders',
+                    style: const TextStyle(color: AppColors.inkMuted, fontSize: 13)),
+              ],
+            ),
+          ),
+          Switch.adaptive(value: online, activeTrackColor: AppColors.success, onChanged: busy ? null : (_) => onToggle()),
+        ],
       ),
     );
   }
@@ -153,39 +248,15 @@ class _Banner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: AppColors.cream, borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(color: AppColors.cream, borderRadius: BorderRadius.circular(AppRadius.md)),
       child: Row(
         children: [
           Icon(icon, color: AppColors.mangoDeep),
           const SizedBox(width: 12),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
         ],
-      ),
-    );
-  }
-}
-
-class _Stat extends StatelessWidget {
-  const _Stat({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: const TextStyle(color: AppColors.inkMuted)),
-            const SizedBox(height: 4),
-            Text(value, style: Theme.of(context).textTheme.headlineSmall),
-          ],
-        ),
       ),
     );
   }
@@ -211,72 +282,86 @@ class _DeliveryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = delivery;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return SurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              StatusPill(
+                label: d.isAccepted ? 'In progress' : 'New offer',
+                color: d.isAccepted ? AppColors.violet : AppColors.mangoDeep,
+                background: d.isAccepted ? AppColors.violetSoft : AppColors.cream,
+              ),
+              const Spacer(),
+              Text(d.payout, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppColors.success)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _Stop(icon: Icons.storefront_rounded, label: 'Pick up', value: d.restaurant),
+          Padding(
+            padding: const EdgeInsets.only(left: 11),
+            child: Container(width: 2, height: 18, color: AppColors.border),
+          ),
+          _Stop(icon: Icons.location_on_rounded, label: 'Drop off', value: d.dropoff, sub: d.customer),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(color: AppColors.violetSoft, borderRadius: BorderRadius.circular(AppRadius.sm)),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: Text(d.isAccepted ? 'Current delivery' : 'New delivery offer',
-                      style: Theme.of(context).textTheme.titleLarge),
-                ),
-                Text(d.payout,
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: AppColors.success)),
+                const Icon(Icons.route_rounded, size: 16, color: AppColors.violet),
+                const SizedBox(width: 6),
+                Text(d.distance, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.violet)),
               ],
             ),
-            const SizedBox(height: 12),
-            _Row(icon: Icons.storefront_outlined, label: 'Pick up', value: d.restaurant),
-            _Row(icon: Icons.person_outline, label: 'Customer', value: d.customer),
-            _Row(icon: Icons.location_on_outlined, label: 'Drop off', value: d.dropoff),
-            _Row(icon: Icons.route_outlined, label: 'Distance', value: d.distance),
-            const SizedBox(height: 16),
-            if (d.isAccepted)
-              CtaButton(label: 'Mark as delivered', loading: busy, onPressed: onComplete)
-            else ...[
-              CtaButton(label: 'Accept', loading: busy, onPressed: canAccept ? onAccept : null),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48), shape: const StadiumBorder()),
-                onPressed: busy ? null : onDecline,
-                child: const Text('Decline'),
+          ),
+          const SizedBox(height: 18),
+          if (d.isAccepted)
+            CtaButton(label: 'Mark as delivered', loading: busy, onPressed: onComplete)
+          else ...[
+            CtaButton(label: 'Accept delivery', loading: busy, onPressed: canAccept ? onAccept : null),
+            const SizedBox(height: 10),
+            OutlinedButton(onPressed: busy ? null : onDecline, child: const Text('Decline')),
+            if (!canAccept)
+              const Padding(
+                padding: EdgeInsets.only(top: 10),
+                child: Text('Go online and get verified to accept offers.', style: TextStyle(color: AppColors.inkMuted, fontSize: 12.5)),
               ),
-              if (!canAccept)
-                const Padding(
-                  padding: EdgeInsets.only(top: 8),
-                  child: Text('Go online and get verified to accept offers.',
-                      style: TextStyle(color: AppColors.inkMuted, fontSize: 12)),
-                ),
-            ],
           ],
-        ),
+        ],
       ),
     );
   }
 }
 
-class _Row extends StatelessWidget {
-  const _Row({required this.icon, required this.label, required this.value});
+class _Stop extends StatelessWidget {
+  const _Stop({required this.icon, required this.label, required this.value, this.sub});
 
   final IconData icon;
   final String label;
   final String value;
+  final String? sub;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 18, color: AppColors.violet),
-          const SizedBox(width: 10),
-          SizedBox(width: 70, child: Text(label, style: const TextStyle(color: AppColors.inkMuted))),
-          Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600))),
-        ],
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 24, color: AppColors.violet),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: const TextStyle(color: AppColors.inkMuted, fontSize: 12)),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+              if (sub?.isNotEmpty == true) Text(sub!, style: const TextStyle(color: AppColors.inkMuted, fontSize: 13)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

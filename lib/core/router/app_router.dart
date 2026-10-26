@@ -7,11 +7,17 @@ import '../../features/auth/domain/session.dart';
 import '../../features/auth/presentation/customer_signup_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/rider_register_screen.dart';
+import '../../features/customer/domain/restaurant.dart';
+import '../../features/customer/presentation/account_screens.dart';
 import '../../features/customer/presentation/cart_screen.dart';
+import '../../features/customer/presentation/checkout_screen.dart';
+import '../../features/customer/presentation/order_detail_screen.dart';
+import '../../features/customer/presentation/order_placed_screen.dart';
+import '../../features/customer/presentation/orders_screen.dart';
+import '../../features/customer/presentation/payment_screen.dart';
 import '../../features/customer/presentation/home_screen.dart';
 import '../../features/customer/presentation/restaurant_screen.dart';
 import '../../features/rider/presentation/rider_dashboard_screen.dart';
-import '../../shared/widgets/async_view.dart';
 import '../../shared/widgets/profile_screen.dart';
 import '../../shared/widgets/shells.dart';
 
@@ -58,29 +64,36 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(path: '/c/home', builder: (_, _) => const HomeScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(
-              path: '/c/orders',
-              builder: (_, _) => const Scaffold(
-                body: EmptyView(
-                  icon: Icons.receipt_long_outlined,
-                  title: 'No orders yet',
-                  subtitle: 'Your order history will show up here.',
-                ),
-              ),
-            ),
+            GoRoute(path: '/c/orders', builder: (_, _) => const OrdersScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/c/cart', builder: (_, _) => const CartScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: '/c/profile', builder: (_, _) => const ProfileScreen()),
+            GoRoute(path: '/c/profile', builder: (_, _) => const CustomerProfileScreen()),
           ]),
         ],
       ),
       GoRoute(
         path: '/c/restaurant/:id',
-        builder: (_, state) => RestaurantScreen(restaurantId: int.parse(state.pathParameters['id']!)),
+        builder: (_, state) => RestaurantScreen(
+          restaurantId: int.parse(state.pathParameters['id']!),
+          initial: state.extra is Restaurant ? state.extra as Restaurant : null,
+        ),
       ),
+      GoRoute(path: '/c/cart', builder: (_, _) => const CartScreen()),
+      GoRoute(path: '/c/checkout', builder: (_, _) => const CheckoutScreen()),
+      GoRoute(
+        path: '/c/pay',
+        builder: (_, state) => PaymentScreen(args: state.extra! as PaymentArgs),
+      ),
+      GoRoute(
+        path: '/c/order-placed/:id',
+        builder: (_, state) => OrderPlacedScreen(orderId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/c/order/:id',
+        builder: (_, state) => OrderDetailScreen(orderId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(path: '/c/addresses', builder: (_, _) => const AddressesScreen()),
+      GoRoute(path: '/c/favorites', builder: (_, _) => const FavoritesScreen()),
 
       // ── Rider ──────────────────────────────────────────────
       StatefulShellRoute.indexedStack(
