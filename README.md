@@ -1,50 +1,51 @@
-# Welcome to your Expo app 👋
+# OyaEat mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Flutter app for **customers** and **riders** of OyaEat, a food-delivery platform for Nigeria.
+One app, two roles: you pick Customer or Rider on the login screen.
 
-## Get started
+Talks to the OyaEat backend (`oyaeat_backend`, Express + Prisma + Socket.IO).
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Run
 
 ```bash
-npm run reset-project
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5000   # Android emulator -> host machine
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+`API_BASE_URL` defaults to `http://10.0.2.2:5000`. On a real device use your machine's LAN address
+or the deployed API.
 
-## Learn more
+```bash
+flutter analyze
+flutter test
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## Structure
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+lib/
+  core/        config, theme, HTTP client, secure storage, router
+  features/
+    auth/      login, customer signup, rider registration, session
+    customer/  restaurants, menu, cart
+    rider/     dashboard, shift toggle, location pings, accept/decline/complete
+  shared/      shared widgets (shells, profile, async states)
+```
 
-## Join the community
+State management is [Riverpod](https://riverpod.dev); routing is `go_router`, which sends each role to its own
+half of the app (`/c/...` customer, `/r/...` rider).
 
-Join our community of developers creating universal apps.
+## Backend quirks handled in the client
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Most routes reply `{success, data, message}`, but rider login, `GET /rider/dashboard` and
+`GET /orders/:id/track-rider` return their payload at the top level; `ApiClient.unwrap` hides that.
+The rider dashboard returns display strings (`id: "ORD-12"`, `payout: "₦1,200"`), which are kept as-is.
+
+## Status
+
+Done: auth for both roles, restaurant browse + search, menu, cart, rider dashboard with shift toggle,
+location pings and accept/decline/complete.
+
+Next: checkout (delivery quote, cash + Paystack), order history and live tracking, rider socket
+(`NEW_DELIVERY_REQUEST`) instead of polling, earnings and wallet, push notifications, chat, fonts
+(Inter + Baloo 2) and the web's brand polish.
