@@ -89,18 +89,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(color: AppColors.mango, borderRadius: BorderRadius.circular(14)),
-                              child: const Icon(Icons.ramen_dining_rounded, color: AppColors.ink),
-                            ),
-                            const SizedBox(width: 12),
-                            Text('OyaEat', style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white)),
-                          ],
-                        ),
+                        Image.asset('assets/brand/logo_white.png', height: 54, fit: BoxFit.contain, alignment: Alignment.centerLeft),
                         const SizedBox(height: 26),
                         Text('Better chow,\nno wahala.',
                             style: theme.textTheme.headlineLarge?.copyWith(color: Colors.white, fontSize: 34)),

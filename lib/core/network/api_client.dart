@@ -89,7 +89,7 @@ class ApiClient {
       case DioExceptionType.receiveTimeout:
         return ApiException('The request timed out. Check your connection.', statusCode: status);
       case DioExceptionType.connectionError:
-        return const ApiException('Cannot reach the server. Check your connection.');
+        return ApiException('Cannot reach the server at ${Env.apiBaseUrl}. Check your connection and that the server is running.');
       default:
         return ApiException(
           status == null ? 'Something went wrong.' : 'Request failed ($status)',
