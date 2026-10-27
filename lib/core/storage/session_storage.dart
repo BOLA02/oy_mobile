@@ -5,6 +5,11 @@ abstract class SessionStorage {
   Future<Map<String, String>> read();
   Future<void> write(Map<String, String> values);
   Future<void> clear();
+
+  /// The role that last signed in on this device. Kept after sign-out so the
+  /// login can try the right account type first.
+  Future<String?> readLastRole();
+  Future<void> writeLastRole(String role);
 }
 
 class SecureSessionStorage implements SessionStorage {
@@ -36,4 +41,10 @@ class SecureSessionStorage implements SessionStorage {
       await _storage.delete(key: k);
     }
   }
+
+  @override
+  Future<String?> readLastRole() => _storage.read(key: 'lastRole');
+
+  @override
+  Future<void> writeLastRole(String role) => _storage.write(key: 'lastRole', value: role);
 }

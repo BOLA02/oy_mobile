@@ -9,6 +9,77 @@ class AuthRepository {
 
   final ApiClient _api;
 
+  /// One sign-in for everyone. The backend has a separate endpoint per role, so
+  /// this tries the likely one first and falls back when the response says the
+  /// account is of another type (403) or the attempt was rate-limited (429).
+  ///
+  /// [preferred] is the role that last signed in on this device; trying it
+  /// first keeps riders from piling up "wrong role" failures on the customer
+  /// endpoint, which the server counts against its login rate limit.
+  Future<Session> login({
+    required String identifier,
+    required String password,
+    AppRole? preferred,
+  }) async {
+    final id = identifier.trim();
+    final isEmail = id.contains('@');
+    // Riders can only sign in with an email (that is what their endpoint takes).
+    final riderFirst = preferred == AppRole.rider && isEmail;
+
+    Future<Session> asCustomer() => loginCustomer(emailOrPhone: id, password: password);
+    Future<Session> asRider() => loginRider(email: id, password: password);
+
+    if (riderFirst) {
+      ApiException riderError;
+      try {
+        return await asRider();
+      } on ApiException catch (e) {
+        if (e.statusCode != 401 && e.statusCode != 429) rethrow;
+        riderError = e;
+      }
+      try {
+        return await asCustomer();
+      } on ApiException catch (e) {
+        // 401 = no such customer, 403 = some other account type: either way the
+        // rider endpoint's answer is the useful one.
+        if (e.statusCode == 401 || e.statusCode == 403) throw riderError;
+        rethrow;
+      }
+    }
+
+    ApiException customerError;
+    try {
+      return await asCustomer();
+    } on ApiException catch (e) {
+      if (e.statusCode != 403 && e.statusCode != 429) rethrow; // wrong details, or no network
+      customerError = e;
+    }
+
+    if (!isEmail) {
+      throw customerError.statusCode == 403
+          ? const ApiException('Riders sign in with their email address.')
+          : customerError;
+    }
+    try {
+      return await asRider();
+    } on ApiException catch (e) {
+      if (e.statusCode == 401) {
+        throw customerError.statusCode == 429
+            ? customerError
+            : const ApiException(
+                'Invalid credentials. Restaurant owners and admins sign in on the web dashboard.',
+                statusCode: 401,
+              );
+      }
+      rethrow;
+    }
+  }
+
+  /// Sends a password-reset link by email. The server always answers the same
+  /// way, so this never reveals whether the address is registered.
+  Future<void> forgotPassword(String email) =>
+      _api.post('/customer/auth/forgot-password', body: {'email': email.trim()});
+
   Future<Session> loginCustomer({required String emailOrPhone, required String password}) async {
     final body = await _api.post('/customer/auth/login', body: {
       'emailOrPhone': emailOrPhone,

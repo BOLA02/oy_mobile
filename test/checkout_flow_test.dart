@@ -64,6 +64,7 @@ void main() {
     final router = GoRouter(
       initialLocation: '/c/checkout',
       routes: [
+        GoRoute(path: '/c/home', builder: (_, _) => const Scaffold(body: Text('home'))),
         GoRoute(path: '/c/checkout', builder: (_, _) => const CheckoutScreen()),
         GoRoute(path: '/c/order-placed/:id', builder: (_, s) => Scaffold(body: Text('placed ${s.pathParameters['id']}'))),
       ],

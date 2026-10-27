@@ -63,7 +63,7 @@ class OrderPlacedScreen extends ConsumerWidget {
                   ).animate().fadeIn(delay: 450.ms),
                 ],
                 const Spacer(),
-                CtaButton(label: 'Track my order', onPressed: () => context.go('/c/order/$orderId')),
+                CtaButton(label: 'Track my order', onPressed: () => context.pushReplacement('/c/order/$orderId')),
                 const SizedBox(height: 10),
                 TextButton(onPressed: () => context.go('/c/home'), child: const Text('Back to home')),
               ],

@@ -1,21 +1,13 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:oyaeat/core/providers.dart';
-import 'package:oyaeat/core/storage/session_storage.dart';
+import 'package:oyaeat/features/auth/presentation/join_screen.dart';
 import 'package:oyaeat/features/auth/presentation/login_screen.dart';
 import 'package:oyaeat/features/customer/application/customer_providers.dart';
-import 'package:oyaeat/features/customer/data/customer_repository.dart';
-import 'package:oyaeat/features/customer/data/restaurant_repository.dart';
-import 'package:oyaeat/features/customer/domain/address.dart';
 import 'package:oyaeat/features/customer/domain/cart.dart';
-import 'package:oyaeat/features/customer/domain/order.dart';
-import 'package:oyaeat/features/customer/domain/promo.dart';
 import 'package:oyaeat/features/customer/domain/restaurant.dart';
 import 'package:oyaeat/features/customer/presentation/account_screens.dart';
 import 'package:oyaeat/features/customer/presentation/cart_screen.dart';
@@ -24,117 +16,11 @@ import 'package:oyaeat/features/customer/presentation/order_detail_screen.dart';
 import 'package:oyaeat/features/customer/presentation/orders_screen.dart';
 import 'package:oyaeat/features/customer/presentation/restaurant_screen.dart';
 import 'package:oyaeat/features/rider/application/rider_providers.dart';
-import 'package:oyaeat/features/rider/data/rider_repository.dart';
-import 'package:oyaeat/features/rider/domain/rider_dashboard.dart';
 import 'package:oyaeat/features/rider/presentation/rider_dashboard_screen.dart';
 
-const _suya = Restaurant(
-  id: 1,
-  name: 'Suya Spot',
-  type: 'Grills',
-  city: 'Ikeja',
-  state: 'Lagos',
-  rating: 4.6,
-  reviewCount: 12,
-  deliveryFee: 1200,
-  minimumOrder: 3000,
-  openingHour: '09:00',
-  closingHour: '22:00',
-  description: 'The best suya in town.',
-);
-const _mamaPut = Restaurant(id: 2, name: 'Mama Put Kitchen', type: 'Nigerian', city: 'Yaba', state: 'Lagos', rating: 4.1);
-const _pizza = Restaurant(id: 3, name: 'A Very Long Restaurant Name That Should Truncate Nicely', type: 'Pizza', city: 'Lekki');
-
-class _FakeRestaurants extends Fake implements RestaurantRepository {
-  @override
-  Future<List<Restaurant>> list({String query = '', int page = 1, int limit = 20}) async => [_suya, _mamaPut, _pizza];
-
-  @override
-  Future<RestaurantMenu> menu(int restaurantId) async => const RestaurantMenu(restaurant: _suya, items: [
-        MenuItem(id: 10, name: 'Beef suya', price: 2500, category: 'Grills', description: 'Spicy skewers with onions and yaji pepper.'),
-        MenuItem(id: 11, name: 'Chicken suya', price: 3000, category: 'Grills'),
-        MenuItem(id: 12, name: 'Zobo', price: 800, category: 'Drinks'),
-      ]);
-}
-
-CustomerOrder _order(int id, OrderStatus status, {bool withRider = false}) => CustomerOrder(
-      id: id,
-      status: status,
-      total: 6500,
-      deliveryFee: 1500,
-      createdAt: DateTime(2026, 10, 26, 12, 30),
-      businessId: 1,
-      businessName: 'Suya Spot',
-      address: '12 Allen Ave, Ikeja',
-      paymentMethod: 'cash',
-      paymentStatus: 'pending',
-      latitude: 6.5344,
-      longitude: 3.3792,
-      items: const [OrderLine(name: 'Beef suya', price: 2500, quantity: 2)],
-      rider: withRider ? const RiderInfo(name: 'Tunde Bello', phone: '0803', vehicle: 'Motorcycle', plate: 'ABC-123') : null,
-    );
-
-class _FakeCustomer extends Fake implements CustomerRepository {
-  @override
-  Future<List<Promo>> promos() async => const [Promo(id: 1, title: '20% off all grills', description: 'This weekend only', businessId: 1)];
-  @override
-  Future<List<Restaurant>> favorites() async => [_suya];
-  @override
-  Future<void> addFavorite(int businessId) async {}
-  @override
-  Future<void> removeFavorite(int businessId) async {}
-  @override
-  Future<CustomerProfile> profile() async =>
-      const CustomerProfile(firstName: 'Ada', lastName: 'Obi', email: 'ada@x.com', phone: '08012345678');
-  @override
-  Future<List<SavedAddress>> addresses() async => const [
-        SavedAddress(id: 1, label: 'Home', address: '12 Allen Ave, Ikeja', latitude: 6.6, longitude: 3.35, isDefault: true),
-        SavedAddress(id: 2, label: 'Work', address: 'Plot 4, Admiralty Way, Lekki Phase 1'),
-      ];
-  @override
-  Future<List<CustomerOrder>> orders() async => [
-        _order(2, OrderStatus.outForDelivery, withRider: true),
-        _order(1, OrderStatus.delivered),
-      ];
-  @override
-  Future<RiderLocation?> trackRider(int orderId) async =>
-      const RiderLocation(name: 'Tunde Bello', latitude: 6.5244, longitude: 3.3792);
-}
-
-class _FakeRider extends Fake implements RiderRepository {
-  final accepted = <int>[];
-
-  @override
-  Future<RiderDashboard> dashboard() async => const RiderDashboard(
-        firstName: 'Tunde',
-        isOnline: true,
-        isApproved: true,
-        todayEarnings: '₦4,800',
-        completedToday: 3,
-        activeDelivery: ActiveDelivery(
-          orderId: 42,
-          restaurant: 'Suya Spot',
-          customer: 'Ada Obi',
-          dropoff: '12 Allen Ave, Ikeja',
-          payout: '₦1,200',
-          status: 'ready',
-          distance: '3.2 km',
-        ),
-        recentDeliveries: [RecentDelivery(restaurant: 'Mama Put Kitchen', payout: '₦900', time: '10:30 AM')],
-      );
-
-  @override
-  Future<void> accept(int orderId) async => accepted.add(orderId);
-}
-
-class _MemoryStorage implements SessionStorage {
-  @override
-  Future<void> clear() async {}
-  @override
-  Future<Map<String, String>> read() async => {};
-  @override
-  Future<void> write(Map<String, String> values) async {}
-}
+import 'support/fakes.dart';
+import 'support/fonts.dart';
+import 'support/memory_storage.dart';
 
 Future<void> _settle(WidgetTester tester) async {
   for (var i = 0; i < 8; i++) {
@@ -155,15 +41,17 @@ Future<void> _pump(
   final router = GoRouter(routes: [
     GoRoute(path: '/', builder: (_, _) => screen),
     GoRoute(path: '/c/:rest', builder: (_, s) => Scaffold(body: Text('route ${s.uri}'))),
+    GoRoute(path: '/rider-register', builder: (_, s) => Scaffold(body: Text('route ${s.uri}'))),
+    GoRoute(path: '/signup', builder: (_, s) => Scaffold(body: Text('route ${s.uri}'))),
     GoRoute(path: '/c/restaurant/:id', builder: (_, s) => Scaffold(body: Text('restaurant ${s.pathParameters['id']}'))),
     GoRoute(path: '/c/order/:id', builder: (_, s) => Scaffold(body: Text('order ${s.pathParameters['id']}'))),
   ]);
 
   await tester.pumpWidget(ProviderScope(
     overrides: [
-      sessionStorageProvider.overrideWithValue(_MemoryStorage()),
-      restaurantRepositoryProvider.overrideWithValue(_FakeRestaurants()),
-      customerRepositoryProvider.overrideWithValue(_FakeCustomer()),
+      sessionStorageProvider.overrideWithValue(MemoryStorage()),
+      restaurantRepositoryProvider.overrideWithValue(FakeRestaurants()),
+      customerRepositoryProvider.overrideWithValue(FakeCustomer()),
       ...overrides,
     ],
     child: MaterialApp.router(
@@ -175,23 +63,24 @@ Future<void> _pump(
   await _settle(tester);
 }
 
-Future<void> _loadRoboto() async {
-  final loader = FontLoader('Roboto');
-  for (final f in ['Regular', 'Medium', 'Bold', 'Black']) {
-    final bytes = await File('test/fonts/Roboto-$f.ttf').readAsBytes();
-    loader.addFont(Future.value(ByteData.sublistView(bytes)));
-  }
-  await loader.load();
-}
-
 void main() {
-  setUpAll(_loadRoboto);
+  setUpAll(loadRoboto);
 
   group('no layout overflow or exceptions', () {
     testWidgets('login at a small phone width', (tester) async {
       await _pump(tester, const LoginScreen(), size: const Size(320, 568));
       expect(find.text('Log in'), findsOneWidget);
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('join screen offers both roles and routes to the right form', (tester) async {
+      await _pump(tester, const JoinScreen());
+      expect(find.text('Order food'), findsOneWidget);
+      expect(find.text('Deliver with us'), findsOneWidget);
+
+      await tester.tap(find.text('Deliver with us'));
+      await _settle(tester);
+      expect(find.text('route /rider-register'), findsOneWidget);
     });
 
     testWidgets('home lists restaurants, filters by cuisine and opens one', (tester) async {
@@ -213,7 +102,7 @@ void main() {
     });
 
     testWidgets('restaurant menu: sections, add to cart, cart bar', (tester) async {
-      await _pump(tester, const RestaurantScreen(restaurantId: 1, initial: _suya));
+      await _pump(tester, const RestaurantScreen(restaurantId: 1, initial: suya));
 
       expect(find.text('Beef suya'), findsOneWidget);
       expect(find.textContaining('View cart'), findsNothing);
@@ -232,7 +121,7 @@ void main() {
     });
 
     testWidgets('add via the sheet, then View cart opens the cart (first tap)', (tester) async {
-      await _pump(tester, const RestaurantScreen(restaurantId: 1, initial: _suya));
+      await _pump(tester, const RestaurantScreen(restaurantId: 1, initial: suya));
 
       // Tap the dish to open the sheet, add two, confirm.
       await tester.tap(find.text('Beef suya'));
@@ -293,7 +182,7 @@ void main() {
     });
 
     testWidgets('rider dashboard: offer, accept', (tester) async {
-      final rider = _FakeRider();
+      final rider = FakeRider();
       await _pump(tester, const RiderDashboardScreen(), overrides: [riderRepositoryProvider.overrideWithValue(rider)]);
 
       expect(find.text('₦4,800'), findsOneWidget);

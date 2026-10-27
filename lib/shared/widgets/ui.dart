@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -223,6 +224,25 @@ class RatingBadge extends StatelessWidget {
           Text(rating.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
         ],
       ),
+    );
+  }
+}
+
+
+/// Back arrow that always works: it pops when it can, and otherwise (e.g. the
+/// screen was opened as the first page) goes to [fallback] instead of doing
+/// nothing.
+class AppBackButton extends StatelessWidget {
+  const AppBackButton({super.key, required this.fallback});
+
+  final String fallback;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back_rounded),
+      tooltip: 'Back',
+      onPressed: () => context.canPop() ? context.pop() : context.go(fallback),
     );
   }
 }

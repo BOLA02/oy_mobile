@@ -98,7 +98,10 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     final async = ref.watch(orderProvider(widget.orderId));
 
     return Scaffold(
-      appBar: AppBar(title: Text('Order #${widget.orderId}')),
+      appBar: AppBar(
+        leading: const AppBackButton(fallback: '/c/orders'),
+        title: Text('Order #${widget.orderId}'),
+      ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorView(message: '$e', onRetry: () => ref.invalidate(ordersProvider)),

@@ -17,7 +17,9 @@ class SessionController extends AsyncNotifier<Session?> {
   }
 
   Future<void> signIn(Session session) async {
-    await ref.read(sessionStorageProvider).write(session.toStorage());
+    final storage = ref.read(sessionStorageProvider);
+    await storage.write(session.toStorage());
+    await storage.writeLastRole(session.role.name);
     state = AsyncData(session);
   }
 

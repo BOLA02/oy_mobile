@@ -74,7 +74,7 @@ class _RiderRegisterScreenState extends ConsumerState<RiderRegisterScreen> {
           actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
         ),
       );
-      if (mounted) context.pop();
+      if (mounted) context.go('/login');
     } catch (e) {
       if (mounted) showError(context, e);
     } finally {

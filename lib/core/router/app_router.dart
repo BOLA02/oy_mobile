@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/application/session_controller.dart';
 import '../../features/auth/domain/session.dart';
 import '../../features/auth/presentation/customer_signup_screen.dart';
+import '../../features/auth/presentation/join_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/rider_register_screen.dart';
 import '../../features/customer/domain/restaurant.dart';
@@ -18,15 +19,17 @@ import '../../features/customer/presentation/payment_screen.dart';
 import '../../features/customer/presentation/home_screen.dart';
 import '../../features/customer/presentation/restaurant_screen.dart';
 import '../../features/rider/presentation/rider_dashboard_screen.dart';
+import '../../features/splash/splash_screen.dart';
 import '../../shared/widgets/profile_screen.dart';
 import '../../shared/widgets/shells.dart';
 
-const _authPaths = {'/login', '/signup', '/rider-register'};
+const _authPaths = {'/login', '/join', '/signup', '/rider-register'};
 
 final routerProvider = Provider<GoRouter>((ref) {
   // Re-evaluate redirects whenever the session changes.
   final refresh = ValueNotifier<int>(0);
   ref.listen(sessionControllerProvider, (_, _) => refresh.value++);
+  ref.listen(splashFinishedProvider, (_, _) => refresh.value++);
   ref.onDispose(refresh.dispose);
 
   return GoRouter(
@@ -36,7 +39,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       final session = ref.read(sessionControllerProvider);
       final path = state.matchedLocation;
 
-      if (session.isLoading) return path == '/splash' ? null : '/splash';
+      // Stay on the splash until the animation has played AND the saved
+      // session has been read.
+      if (session.isLoading || !ref.read(splashFinishedProvider)) {
+        return path == '/splash' ? null : '/splash';
+      }
 
       final user = session.value;
       if (user == null) return _authPaths.contains(path) ? null : '/login';
@@ -48,11 +55,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/splash',
-        builder: (_, _) => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      ),
+      GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
+      GoRoute(path: '/join', builder: (_, _) => const JoinScreen()),
       GoRoute(path: '/signup', builder: (_, _) => const CustomerSignupScreen()),
       GoRoute(path: '/rider-register', builder: (_, _) => const RiderRegisterScreen()),
 

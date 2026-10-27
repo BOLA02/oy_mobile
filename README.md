@@ -50,7 +50,10 @@ checkout (saved or pinned address, live delivery-fee quote, cash or Paystack), p
 order history, order tracking with progress timeline, rider details and distance, cancel, review,
 saved addresses.
 
-**Rider:** register (ID upload) and log in, dashboard, online/offline shift, location pings,
+**Sign-in:** one login for everyone; the app works out whether the account is a customer or a rider
+(the role is only chosen when signing up). Animated splash, forgot-password by email link.
+
+**Rider:** register (ID upload), dashboard, online/offline shift, location pings,
 accept / decline / complete deliveries.
 
 Next: rider socket (`NEW_DELIVERY_REQUEST`) instead of polling, rider earnings and wallet,

@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/async_view.dart';
 import '../../../shared/widgets/cta_button.dart';
 import '../application/session_controller.dart';
 import '../domain/session.dart';
 
+/// One sign-in for everyone. Customers and riders are told apart by their
+/// account, not by a switch; the role is only chosen when signing up.
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -19,7 +22,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _form = GlobalKey<FormState>();
   final _identifier = TextEditingController();
   final _password = TextEditingController();
-  AppRole _role = AppRole.customer;
   bool _loading = false;
   bool _obscure = true;
 
@@ -35,12 +37,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     FocusScope.of(context).unfocus();
     setState(() => _loading = true);
     try {
-      final repo = ref.read(authRepositoryProvider);
-      final id = _identifier.text.trim();
-      final session = _role == AppRole.customer
-          ? await repo.loginCustomer(emailOrPhone: id, password: _password.text)
-          : await repo.loginRider(email: id, password: _password.text);
-      // The router redirects to the right half of the app once signed in.
+      final storage = ref.read(sessionStorageProvider);
+      final last = await storage.readLastRole();
+      final preferred = AppRole.values.where((r) => r.name == last).firstOrNull;
+      final session = await ref
+          .read(authRepositoryProvider)
+          .login(identifier: _identifier.text, password: _password.text, preferred: preferred);
+      // The router sends each role to its own half of the app once signed in.
       await ref.read(sessionControllerProvider.notifier).signIn(session);
     } catch (e) {
       if (mounted) showError(context, e);
@@ -49,9 +52,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _forgotPassword() async {
+    final email = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _ForgotPasswordSheet(initial: _identifier.text.contains('@') ? _identifier.text.trim() : ''),
+    );
+    if (email == null || !mounted) return;
+    try {
+      await ref.read(authRepositoryProvider).forgotPassword(email);
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          icon: const Icon(Icons.mark_email_read_outlined, color: AppColors.violet, size: 36),
+          title: const Text('Check your email'),
+          content: const Text(
+            "If that address is registered, we've sent a link to reset your password. "
+            'Open it, choose a new password, then come back and log in.',
+          ),
+          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK'))],
+        ),
+      );
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isCustomer = _role == AppRole.customer;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -89,7 +118,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Image.asset('assets/brand/logo_white.png', height: 54, fit: BoxFit.contain, alignment: Alignment.centerLeft),
+                        Image.asset('assets/brand/logo_white.png', height: 58, fit: BoxFit.contain, alignment: Alignment.centerLeft),
                         const SizedBox(height: 26),
                         Text('Better chow,\nno wahala.',
                             style: theme.textTheme.headlineLarge?.copyWith(color: Colors.white, fontSize: 34)),
@@ -111,42 +140,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: SafeArea(
                 top: false,
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(color: AppColors.violetSoft, borderRadius: BorderRadius.circular(30)),
-                        child: Row(
-                          children: [
-                            _RoleTab(
-                              icon: Icons.restaurant_menu_rounded,
-                              label: 'Customer',
-                              selected: isCustomer,
-                              onTap: () => setState(() {
-                                _role = AppRole.customer;
-                                _identifier.clear();
-                              }),
-                            ),
-                            _RoleTab(
-                              icon: Icons.two_wheeler_rounded,
-                              label: 'Rider',
-                              selected: !isCustomer,
-                              onTap: () => setState(() {
-                                _role = AppRole.rider;
-                                _identifier.clear();
-                              }),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 22),
-                      Text(isCustomer ? 'Welcome back' : 'Ready to ride?', style: theme.textTheme.headlineSmall),
+                      Text('Welcome back', style: theme.textTheme.headlineSmall),
                       const SizedBox(height: 4),
-                      Text(isCustomer ? 'Log in to order your favourite meals.' : 'Log in to start accepting deliveries.',
-                          style: const TextStyle(color: AppColors.inkMuted)),
-                      const SizedBox(height: 20),
+                      const Text('Log in to order food or start delivering.', style: TextStyle(color: AppColors.inkMuted)),
+                      const SizedBox(height: 22),
                       Form(
                         key: _form,
                         child: Column(
@@ -154,10 +155,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             TextFormField(
                               controller: _identifier,
                               keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              autocorrect: false,
                               autofillHints: const [AutofillHints.username],
-                              decoration: InputDecoration(
-                                labelText: isCustomer ? 'Email or phone' : 'Email',
-                                prefixIcon: const Icon(Icons.person_outline_rounded),
+                              decoration: const InputDecoration(
+                                labelText: 'Email or phone',
+                                prefixIcon: Icon(Icons.person_outline_rounded),
                               ),
                               validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                             ),
@@ -180,13 +183,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      CtaButton(label: 'Log in', loading: _loading, onPressed: _submit),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () => context.push(isCustomer ? '/signup' : '/rider-register'),
-                        child: Text(isCustomer ? 'New here? Create an account' : 'Want to ride with us? Register as a rider'),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(onPressed: _forgotPassword, child: const Text('Forgot password?')),
                       ),
+                      const SizedBox(height: 4),
+                      CtaButton(label: 'Log in', loading: _loading, onPressed: _submit),
+                      const SizedBox(height: 22),
+                      Row(
+                        children: const [
+                          Expanded(child: Divider()),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('New to OyaEat?', style: TextStyle(color: AppColors.inkMuted, fontSize: 13)),
+                          ),
+                          Expanded(child: Divider()),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton(onPressed: () => context.push('/join'), child: const Text('Create an account')),
                     ],
                   ),
                 ),
@@ -199,35 +214,58 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
-class _RoleTab extends StatelessWidget {
-  const _RoleTab({required this.icon, required this.label, required this.selected, required this.onTap});
+class _ForgotPasswordSheet extends StatefulWidget {
+  const _ForgotPasswordSheet({required this.initial});
 
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
+  final String initial;
+
+  @override
+  State<_ForgotPasswordSheet> createState() => _ForgotPasswordSheetState();
+}
+
+class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
+  late final _email = TextEditingController(text: widget.initial);
+  final _form = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _email.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 11),
-          decoration: BoxDecoration(
-            color: selected ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(26),
-            boxShadow: selected ? AppShadows.card : null,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 18, color: selected ? AppColors.violet : AppColors.inkMuted),
-              const SizedBox(width: 8),
-              Text(label, style: TextStyle(fontWeight: FontWeight.w700, color: selected ? AppColors.violet : AppColors.inkMuted)),
-            ],
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Form(
+            key: _form,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Reset your password', style: Theme.of(context).textTheme.headlineSmall),
+                const SizedBox(height: 6),
+                const Text("Enter your account's email and we'll send you a reset link.", style: TextStyle(color: AppColors.inkMuted)),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _email,
+                  keyboardType: TextInputType.emailAddress,
+                  autofocus: true,
+                  decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline_rounded)),
+                  validator: (v) => (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+                ),
+                const SizedBox(height: 16),
+                CtaButton(
+                  label: 'Send reset link',
+                  onPressed: () {
+                    if (_form.currentState!.validate()) Navigator.pop(context, _email.text.trim());
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

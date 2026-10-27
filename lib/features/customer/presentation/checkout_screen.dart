@@ -164,7 +164,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   void _finish(int orderId) {
     ref.read(cartProvider.notifier).clear();
     ref.invalidate(ordersProvider);
-    if (mounted) context.go('/c/order-placed/$orderId');
+    if (!mounted) return;
+    // Home underneath, confirmation on top: Back from anywhere after this lands on Home.
+    context.go('/c/home');
+    context.push('/c/order-placed/$orderId');
   }
 
   @override
