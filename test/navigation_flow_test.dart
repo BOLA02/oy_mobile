@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:oyaeat/core/providers.dart';
 import 'package:oyaeat/core/router/app_router.dart';
 import 'package:oyaeat/features/customer/application/customer_providers.dart';
+import 'package:oyaeat/features/rider/application/offers.dart';
 import 'package:oyaeat/features/rider/application/rider_providers.dart';
 
 import 'support/fakes.dart';
@@ -34,6 +35,8 @@ Future<ProviderContainer> _launch(WidgetTester tester, {Map<String, String>? sav
     restaurantRepositoryProvider.overrideWithValue(FakeRestaurants()),
     customerRepositoryProvider.overrideWithValue(FakeCustomer()),
     riderRepositoryProvider.overrideWithValue(FakeRider()),
+    // Never open a real socket from a test.
+    offerSocketProvider.overrideWithValue(FakeOfferSocket()),
     ...extra,
   ]);
   addTearDown(container.dispose);

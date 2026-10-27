@@ -9,6 +9,7 @@ import '../../../shared/widgets/async_view.dart';
 import '../../../shared/widgets/cta_button.dart';
 import '../../../shared/widgets/ui.dart';
 import '../application/location_reporter.dart';
+import '../application/offers.dart';
 import '../application/rider_providers.dart';
 import '../domain/rider_dashboard.dart';
 
@@ -21,6 +22,7 @@ class RiderDashboardScreen extends ConsumerStatefulWidget {
 
 class _RiderDashboardScreenState extends ConsumerState<RiderDashboardScreen> {
   Timer? _poll;
+  Duration? _pollEvery;
   bool _busy = false;
 
   @override
@@ -29,15 +31,20 @@ class _RiderDashboardScreenState extends ConsumerState<RiderDashboardScreen> {
     super.dispose();
   }
 
-  /// Until live push is wired up, an online rider refreshes periodically to
-  /// pick up new delivery offers.
-  void _syncPolling(bool online) {
-    if (online && _poll == null) {
-      _poll = Timer.periodic(const Duration(seconds: 15), (_) => ref.invalidate(riderDashboardProvider));
-    } else if (!online) {
+  /// Offers arrive instantly over the socket, so polling is only a safety net:
+  /// slow while the live connection is up, quicker when it is down.
+  void _syncPolling({required bool online, required bool live}) {
+    if (!online) {
       _poll?.cancel();
       _poll = null;
+      _pollEvery = null;
+      return;
     }
+    final every = live ? const Duration(seconds: 60) : const Duration(seconds: 15);
+    if (_poll != null && _pollEvery == every) return;
+    _poll?.cancel();
+    _pollEvery = every;
+    _poll = Timer.periodic(every, (_) => ref.invalidate(riderDashboardProvider));
   }
 
   Future<void> _run(Future<void> Function() action) async {
@@ -70,7 +77,8 @@ class _RiderDashboardScreenState extends ConsumerState<RiderDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final dash = ref.watch(riderDashboardProvider);
-    _syncPolling(dash.value?.isOnline ?? false);
+    final live = ref.watch(liveConnectionProvider).value ?? false;
+    _syncPolling(online: dash.value?.isOnline ?? false, live: live);
 
     return Scaffold(
       body: SafeArea(
@@ -95,7 +103,15 @@ class _RiderDashboardScreenState extends ConsumerState<RiderDashboardScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
               children: [
-                Text('Hi ${d.firstName.isEmpty ? 'rider' : d.firstName} 👋', style: Theme.of(context).textTheme.headlineMedium),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text('Hi ${d.firstName.isEmpty ? 'rider' : d.firstName} 👋',
+                          maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.headlineMedium),
+                    ),
+                    _LiveChip(live: live),
+                  ],
+                ),
                 const SizedBox(height: 14),
                 _EarningsHero(earnings: d.todayEarnings, deliveries: d.completedToday),
                 const SizedBox(height: 16),
@@ -151,6 +167,30 @@ class _RiderDashboardScreenState extends ConsumerState<RiderDashboardScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Green "Live" when offers will arrive instantly, grey while reconnecting.
+class _LiveChip extends StatelessWidget {
+  const _LiveChip({required this.live});
+
+  final bool live;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(color: live ? AppColors.successSoft : AppColors.violetSoft, borderRadius: BorderRadius.circular(20)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 8, height: 8, decoration: BoxDecoration(color: live ? AppColors.success : AppColors.inkFaint, shape: BoxShape.circle)),
+          const SizedBox(width: 6),
+          Text(live ? 'Live' : 'Connecting…',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: live ? AppColors.success : AppColors.inkMuted)),
+        ],
       ),
     );
   }

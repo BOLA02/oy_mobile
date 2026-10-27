@@ -1,4 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:oyaeat/core/network/api_exception.dart';
+import 'package:oyaeat/features/rider/data/offer_socket.dart';
+import 'package:oyaeat/features/rider/domain/delivery_offer.dart';
+import 'package:oyaeat/features/rider/domain/wallet.dart';
 import 'package:oyaeat/features/customer/data/customer_repository.dart';
 import 'package:oyaeat/features/customer/data/restaurant_repository.dart';
 import 'package:oyaeat/features/customer/domain/address.dart';
@@ -83,6 +89,20 @@ class FakeCustomer extends Fake implements CustomerRepository {
 
 class FakeRider extends Fake implements RiderRepository {
   final accepted = <int>[];
+  final declined = <int>[];
+  final payouts = <double>[];
+
+  /// Set to make the next accept / payout fail like the server would.
+  ApiException? acceptError;
+  ApiException? payoutError;
+  WalletSummary walletResult = const WalletSummary(
+    balance: 0,
+    pendingPayouts: 0,
+    transactions: [],
+    hasBankDetails: false,
+    bankVerified: false,
+    linkedBankAccount: 'Not setup yet. Please email support.',
+  );
 
   @override
   Future<RiderDashboard> dashboard() async => const RiderDashboard(
@@ -104,6 +124,56 @@ class FakeRider extends Fake implements RiderRepository {
       );
 
   @override
-  Future<void> accept(int orderId) async => accepted.add(orderId);
+  Future<void> accept(int orderId) async {
+    if (acceptError != null) throw acceptError!;
+    accepted.add(orderId);
+  }
+
+  @override
+  Future<void> decline(int orderId) async => declined.add(orderId);
+
+  @override
+  Future<WalletSummary> wallet() async => walletResult;
+
+  @override
+  Future<String> requestPayout(double amount) async {
+    if (payoutError != null) throw payoutError!;
+    payouts.add(amount);
+    return 'Withdrawal request submitted successfully! Awaiting manual admin confirmation.';
+  }
 }
 
+/// A socket you can push offers through by hand.
+class FakeOfferSocket implements OfferSocket {
+  final _offers = StreamController<DeliveryOffer>.broadcast();
+  final _connection = StreamController<bool>.broadcast();
+  FakeOfferSocket({this.connected = true});
+
+  bool connected;
+  bool disposed = false;
+
+  void emitOffer(DeliveryOffer offer) => _offers.add(offer);
+
+  void setConnected(bool value) {
+    connected = value;
+    _connection.add(value);
+  }
+
+  @override
+  Stream<DeliveryOffer> get offers => _offers.stream;
+
+  @override
+  Stream<bool> get connection => _connection.stream;
+
+  @override
+  bool get isConnected => connected;
+
+  @override
+  void connect() {}
+
+  @override
+  void dispose() => disposed = true;
+}
+
+DeliveryOffer offer(int id, {String restaurant = 'Suya Spot', double payout = 1200, String distance = '1.4 km', String dropoff = '12 Allen Ave, Ikeja'}) =>
+    DeliveryOffer(orderId: id, restaurantName: restaurant, payout: payout, distance: distance, dropoffAddress: dropoff, receivedAt: DateTime(2026, 10, 28));

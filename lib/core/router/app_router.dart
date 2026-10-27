@@ -19,6 +19,7 @@ import '../../features/customer/presentation/payment_screen.dart';
 import '../../features/customer/presentation/home_screen.dart';
 import '../../features/customer/presentation/restaurant_screen.dart';
 import '../../features/rider/presentation/rider_dashboard_screen.dart';
+import '../../features/rider/presentation/wallet_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../shared/widgets/profile_screen.dart';
 import '../../shared/widgets/shells.dart';
@@ -106,6 +107,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(routes: [
             GoRoute(path: '/r/deliveries', builder: (_, _) => const RiderDashboardScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/r/wallet', builder: (_, _) => const WalletScreen()),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/r/profile', builder: (_, _) => const ProfileScreen()),

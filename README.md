@@ -53,11 +53,16 @@ saved addresses.
 **Sign-in:** one login for everyone; the app works out whether the account is a customer or a rider
 (the role is only chosen when signing up). Animated splash, forgot-password by email link.
 
-**Rider:** register (ID upload), dashboard, online/offline shift, location pings,
+**Rider:** live delivery offers over Socket.IO (full-screen sheet with a 45 s countdown, queued if
+several arrive, "taken by another rider" handling), wallet (balance, today / this week / last 7 days,
+bank status, transaction history, withdraw requests), register (ID upload), dashboard, online/offline shift, location pings,
 accept / decline / complete deliveries.
 
-Next: rider socket (`NEW_DELIVERY_REQUEST`) instead of polling, rider earnings and wallet,
-push notifications (needs a small backend addition), chat/support, map view for tracking.
+Next: push notifications so a rider hears about offers with the app closed (needs a small backend
+addition), chat/support, map view for tracking.
+
+Note: offers are only delivered while the app is open (the socket needs the app running). The server
+never expires an offer; the 45 s countdown only puts it away on this device.
 
 ## Notes
 
