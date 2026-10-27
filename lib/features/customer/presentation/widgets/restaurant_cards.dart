@@ -55,7 +55,7 @@ class FavoriteButton extends ConsumerWidget {
 }
 
 String _subtitle(Restaurant r) =>
-    [r.type, r.location].whereType<String>().where((s) => s.isNotEmpty).join(' · ');
+    [r.typeLabel, r.location].whereType<String>().where((s) => s.isNotEmpty).join(' · ');
 
 /// Full-width card used in the main restaurant list.
 class RestaurantCard extends StatelessWidget {

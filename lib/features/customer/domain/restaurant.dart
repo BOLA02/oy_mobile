@@ -1,3 +1,24 @@
+/// Business types are stored as codes (`buka_mamaput`); this gives them the
+/// names customers should see. Unknown codes are tidied up rather than hidden.
+String businessTypeLabel(String? raw) {
+  final code = raw?.trim() ?? '';
+  if (code.isEmpty) return '';
+  const known = {
+    'buka_mamaput': 'Buka / Mama Put',
+    'fastfood_qsr': 'Fast food',
+    'casual_dining': 'Casual dining',
+    'restaurant': 'Restaurant',
+    'ghost_kitchen': 'Delivery kitchen',
+    'pastries_bakery': 'Bakery & pastries',
+    'supermarket_grocery': 'Groceries',
+    'drinks_liquor': 'Drinks',
+  };
+  final label = known[code.toLowerCase()];
+  if (label != null) return label;
+  final spaced = code.replaceAll('_', ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+  return spaced[0].toUpperCase() + spaced.substring(1);
+}
+
 class Restaurant {
   const Restaurant({
     required this.id,
@@ -28,6 +49,8 @@ class Restaurant {
   final double? deliveryFee;
   final String? openingHour;
   final String? closingHour;
+
+  String get typeLabel => businessTypeLabel(type);
 
   String get location => [city, state].whereType<String>().where((s) => s.isNotEmpty).join(', ');
 

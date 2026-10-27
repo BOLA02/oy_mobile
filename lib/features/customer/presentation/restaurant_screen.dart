@@ -238,7 +238,7 @@ class _Info extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            [r.type, r.location].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
+            [r.typeLabel, r.location].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
             style: const TextStyle(color: AppColors.inkMuted),
           ),
           if (r.reviewCount > 0)

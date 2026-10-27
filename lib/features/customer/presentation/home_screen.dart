@@ -222,7 +222,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   for (final c in cuisines)
                     _CuisineChip(
-                      label: c,
+                      label: businessTypeLabel(c),
                       selected: cuisine == c,
                       onTap: () => ref.read(selectedCuisineProvider.notifier).set(c),
                     ),
@@ -247,7 +247,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ],
       SliverToBoxAdapter(
-        child: SectionHeader(title: cuisine ?? 'All restaurants'),
+        child: SectionHeader(title: cuisine == null ? 'All restaurants' : businessTypeLabel(cuisine)),
       ),
       if (filtered.isEmpty)
         const SliverToBoxAdapter(

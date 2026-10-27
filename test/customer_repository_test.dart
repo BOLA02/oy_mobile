@@ -184,6 +184,21 @@ void main() {
     });
   });
 
+  group('Business type labels', () {
+    test('known codes get friendly names', () {
+      expect(businessTypeLabel('buka_mamaput'), 'Buka / Mama Put');
+      expect(businessTypeLabel('fastfood_qsr'), 'Fast food');
+      expect(businessTypeLabel('restaurant'), 'Restaurant');
+      expect(const Restaurant(id: 1, name: 'x', type: 'ghost_kitchen').typeLabel, 'Delivery kitchen');
+    });
+
+    test('unknown codes are tidied, empty ones stay empty', () {
+      expect(businessTypeLabel('street_food_stall'), 'Street food stall');
+      expect(businessTypeLabel('  '), '');
+      expect(businessTypeLabel(null), '');
+    });
+  });
+
   group('Cart minimum order', () {
     test('shortfall is how much more is needed to reach the minimum', () {
       const cart = CartState(
