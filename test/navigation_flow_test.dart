@@ -6,6 +6,7 @@ import 'package:oyaeat/core/providers.dart';
 import 'package:oyaeat/core/router/app_router.dart';
 import 'package:oyaeat/features/customer/application/customer_providers.dart';
 import 'package:oyaeat/features/rider/application/offers.dart';
+import 'package:oyaeat/features/splash/splash_screen.dart';
 import 'package:oyaeat/features/rider/application/rider_providers.dart';
 
 import 'support/fakes.dart';
@@ -25,7 +26,7 @@ class _App extends ConsumerWidget {
 const _customerSession = {'token': 't', 'role': 'customer', 'userId': '7', 'name': 'Ada Obi'};
 const _riderSession = {'token': 'r', 'role': 'rider', 'userId': '12', 'name': 'Tunde Bello'};
 
-Future<ProviderContainer> _launch(WidgetTester tester, {Map<String, String>? saved, List<Override> extra = const []}) async {
+Future<ProviderContainer> _launch(WidgetTester tester, {Map<String, String>? saved, List<Override> extra = const [], bool realSplash = false}) async {
   tester.view.physicalSize = const Size(390, 844) * 3;
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
@@ -35,6 +36,8 @@ Future<ProviderContainer> _launch(WidgetTester tester, {Map<String, String>? sav
     restaurantRepositoryProvider.overrideWithValue(FakeRestaurants()),
     customerRepositoryProvider.overrideWithValue(FakeCustomer()),
     riderRepositoryProvider.overrideWithValue(FakeRider()),
+    // Tests that are not about the splash should not sit through it.
+    if (!realSplash) splashDurationProvider.overrideWithValue(const Duration(milliseconds: 50)),
     // Never open a real socket from a test.
     offerSocketProvider.overrideWithValue(FakeOfferSocket()),
     ...extra,
@@ -54,14 +57,20 @@ void main() {
   setUpAll(loadRoboto);
 
   testWidgets('signed out: the splash plays, then the login appears', (tester) async {
-    await _launch(tester);
+    await _launch(tester, realSplash: true);
     await _wait(tester, const Duration(milliseconds: 500));
 
     // Splash: the saved session is already read, but the animation still holds the screen.
     expect(find.byKey(const ValueKey('splash')), findsOneWidget);
     expect(find.text('Welcome back'), findsNothing);
 
+    // Still there well into the animation...
     await _wait(tester, const Duration(seconds: 3));
+    expect(find.byKey(const ValueKey('splash')), findsOneWidget);
+    expect(find.text('Welcome back'), findsNothing);
+
+    // ...and gone once its time is up.
+    await _wait(tester, const Duration(seconds: 1));
     expect(find.text('Welcome back'), findsOneWidget);
     expect(find.byKey(const ValueKey('splash')), findsNothing);
   });

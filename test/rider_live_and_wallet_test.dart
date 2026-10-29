@@ -9,6 +9,7 @@ import 'package:oyaeat/features/rider/application/rider_providers.dart';
 import 'package:oyaeat/features/rider/domain/delivery_offer.dart';
 import 'package:oyaeat/features/rider/domain/wallet.dart';
 import 'package:oyaeat/features/rider/presentation/wallet_screen.dart';
+import 'package:oyaeat/features/splash/splash_screen.dart';
 
 import 'support/fakes.dart';
 import 'support/fonts.dart';
@@ -45,6 +46,7 @@ Future<_Rig> _launchRider(WidgetTester tester, {FakeOfferSocket? socket}) async 
     sessionStorageProvider.overrideWithValue(MemoryStorage(_riderSession)),
     riderRepositoryProvider.overrideWithValue(rider),
     offerSocketProvider.overrideWithValue(fakeSocket),
+    splashDurationProvider.overrideWithValue(const Duration(milliseconds: 50)),
   ]);
   addTearDown(container.dispose);
   await tester.pumpWidget(UncontrolledProviderScope(container: container, child: const _App()));
