@@ -64,7 +64,7 @@ class CartScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.storefront_rounded, size: 18, color: AppColors.violet),
+                    const Icon(Icons.storefront_rounded, size: 18, color: AppColors.primary),
                     const SizedBox(width: 8),
                     Expanded(child: Text(cart.restaurantName ?? '', style: Theme.of(context).textTheme.titleMedium)),
                   ],
@@ -88,7 +88,7 @@ class CartScreen extends ConsumerWidget {
                           ..hideCurrentSnackBar()
                           ..showSnackBar(SnackBar(
                             content: Text('${line.item.name} removed'),
-                            action: SnackBarAction(label: 'Undo', textColor: AppColors.mango, onPressed: () => ctl.restore(line)),
+                            action: SnackBarAction(label: 'Undo', textColor: AppColors.accent, onPressed: () => ctl.restore(line)),
                           ));
                       },
                       child: SurfaceCard(
@@ -107,7 +107,7 @@ class CartScreen extends ConsumerWidget {
                                   Text(line.item.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
                                   const SizedBox(height: 4),
                                   Text(formatNaira(line.total),
-                                      style: const TextStyle(color: AppColors.violet, fontWeight: FontWeight.w800)),
+                                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800)),
                                 ],
                               ),
                             ),
@@ -135,7 +135,7 @@ class CartScreen extends ConsumerWidget {
                     decoration: BoxDecoration(color: AppColors.cream, borderRadius: BorderRadius.circular(AppRadius.md)),
                     child: Row(
                       children: [
-                        const Icon(Icons.info_outline_rounded, color: AppColors.mangoDeep),
+                        const Icon(Icons.info_outline_rounded, color: AppColors.warning),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(

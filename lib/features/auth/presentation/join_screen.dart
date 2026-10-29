@@ -31,7 +31,7 @@ class JoinScreen extends StatelessWidget {
               icon: Icons.two_wheeler_rounded,
               title: 'Deliver with us',
               subtitle: 'Ride as a delivery partner. Accept orders nearby and earn on every trip.',
-              gradient: const LinearGradient(colors: [Color(0xFFFFC94D), Color(0xFFF59E0B)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              gradient: const LinearGradient(colors: [Color(0xFFFF9A4D), AppColors.brandOrange], begin: Alignment.topLeft, end: Alignment.bottomRight),
               dark: true,
               onTap: () => context.push('/rider-register'),
             ),
@@ -85,7 +85,7 @@ class _RoleCard extends StatelessWidget {
                   width: 58,
                   height: 58,
                   decoration: BoxDecoration(color: fg.withValues(alpha: 0.14), shape: BoxShape.circle),
-                  child: Icon(icon, size: 30, color: dark ? AppColors.ink : AppColors.mango),
+                  child: Icon(icon, size: 30, color: dark ? AppColors.ink : AppColors.accent),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

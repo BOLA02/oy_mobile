@@ -110,7 +110,7 @@ class RestaurantCard extends StatelessWidget {
                 Row(
                   children: [
                     if (r.deliveryFee != null) ...[
-                      const Icon(Icons.two_wheeler_rounded, size: 16, color: AppColors.violet),
+                      const Icon(Icons.two_wheeler_rounded, size: 16, color: AppColors.primary),
                       const SizedBox(width: 4),
                       Text(formatNaira(r.deliveryFee!), style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
                       const SizedBox(width: 14),
@@ -177,7 +177,7 @@ class RestaurantMiniCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.two_wheeler_rounded, size: 15, color: AppColors.violet),
+                        const Icon(Icons.two_wheeler_rounded, size: 15, color: AppColors.primary),
                         const SizedBox(width: 4),
                         Text(formatNaira(r.deliveryFee!), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                       ],

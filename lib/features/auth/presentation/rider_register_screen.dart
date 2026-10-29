@@ -128,7 +128,7 @@ class _RiderRegisterScreenState extends ConsumerState<RiderRegisterScreen> {
               const SizedBox(height: 18),
               OutlinedButton.icon(
                 onPressed: _pickId,
-                icon: Icon(_idDocument == null ? Icons.upload_file : Icons.check_circle, color: AppColors.violet),
+                icon: Icon(_idDocument == null ? Icons.upload_file : Icons.check_circle, color: AppColors.primary),
                 label: Text(_idDocument == null ? 'Upload ID photo' : 'ID photo selected'),
                 style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
               ),

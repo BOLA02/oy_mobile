@@ -95,7 +95,7 @@ class _RiderDashboardScreenState extends ConsumerState<RiderDashboardScreen> {
           ),
           error: (e, _) => ErrorView(message: '$e', onRetry: () => ref.invalidate(riderDashboardProvider)),
           data: (d) => RefreshIndicator(
-            color: AppColors.violet,
+            color: AppColors.primary,
             onRefresh: () async {
               ref.invalidate(riderDashboardProvider);
               await ref.read(riderDashboardProvider.future);
@@ -182,7 +182,7 @@ class _LiveChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(color: live ? AppColors.successSoft : AppColors.violetSoft, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: live ? AppColors.successSoft : AppColors.primarySoft, borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -228,7 +228,7 @@ class _EarningsHero extends StatelessWidget {
             decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(AppRadius.md)),
             child: Column(
               children: [
-                Text('$deliveries', style: const TextStyle(color: AppColors.mango, fontSize: 24, fontWeight: FontWeight.w800)),
+                Text('$deliveries', style: const TextStyle(color: AppColors.accent, fontSize: 24, fontWeight: FontWeight.w800)),
                 Text('deliveries', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
               ],
             ),
@@ -257,9 +257,9 @@ class _ShiftCard extends StatelessWidget {
             height: 46,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: online ? AppColors.successSoft : AppColors.violetSoft,
+              color: online ? AppColors.successSoft : AppColors.primarySoft,
             ),
-            child: Icon(Icons.two_wheeler_rounded, color: online ? AppColors.success : AppColors.violet),
+            child: Icon(Icons.two_wheeler_rounded, color: online ? AppColors.success : AppColors.primary),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -293,7 +293,7 @@ class _Banner extends StatelessWidget {
       decoration: BoxDecoration(color: AppColors.cream, borderRadius: BorderRadius.circular(AppRadius.md)),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.mangoDeep),
+          Icon(icon, color: AppColors.warning),
           const SizedBox(width: 12),
           Expanded(child: Text(text, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
         ],
@@ -330,8 +330,8 @@ class _DeliveryCard extends StatelessWidget {
             children: [
               StatusPill(
                 label: d.isAccepted ? 'In progress' : 'New offer',
-                color: d.isAccepted ? AppColors.violet : AppColors.mangoDeep,
-                background: d.isAccepted ? AppColors.violetSoft : AppColors.cream,
+                color: d.isAccepted ? AppColors.primary : AppColors.warning,
+                background: d.isAccepted ? AppColors.primarySoft : AppColors.cream,
               ),
               const Spacer(),
               Text(d.payout, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppColors.success)),
@@ -347,13 +347,13 @@ class _DeliveryCard extends StatelessWidget {
           const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(color: AppColors.violetSoft, borderRadius: BorderRadius.circular(AppRadius.sm)),
+            decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(AppRadius.sm)),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.route_rounded, size: 16, color: AppColors.violet),
+                const Icon(Icons.route_rounded, size: 16, color: AppColors.primary),
                 const SizedBox(width: 6),
-                Text(d.distance, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.violet)),
+                Text(d.distance, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary)),
               ],
             ),
           ),
@@ -389,7 +389,7 @@ class _Stop extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 24, color: AppColors.violet),
+        Icon(icon, size: 24, color: AppColors.primary),
         const SizedBox(width: 12),
         Expanded(
           child: Column(

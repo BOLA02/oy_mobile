@@ -37,9 +37,9 @@ class CustomerProfileScreen extends ConsumerWidget {
               children: [
                 CircleAvatar(
                   radius: 32,
-                  backgroundColor: AppColors.mango,
+                  backgroundColor: AppColors.accent,
                   child: Text(name.isEmpty ? '?' : name[0].toUpperCase(),
-                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.ink)),
+                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white)),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -113,7 +113,7 @@ class _Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, color: color ?? AppColors.violet),
+      leading: Icon(icon, color: color ?? AppColors.primary),
       title: Text(title, style: TextStyle(fontWeight: FontWeight.w600, color: color)),
       trailing: color == null ? const Icon(Icons.chevron_right_rounded, color: AppColors.inkFaint) : null,
       onTap: onTap,
@@ -146,7 +146,7 @@ class AddressesScreen extends ConsumerWidget {
               ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.violet,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         onPressed: () async {
           final created = await showAddAddressSheet(context);
@@ -171,8 +171,8 @@ class _AddressCard extends ConsumerWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: AppColors.violetSoft,
-            child: Icon(address.label.toLowerCase() == 'work' ? Icons.work_outline_rounded : Icons.home_outlined, color: AppColors.violet),
+            backgroundColor: AppColors.primarySoft,
+            child: Icon(address.label.toLowerCase() == 'work' ? Icons.work_outline_rounded : Icons.home_outlined, color: AppColors.primary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -184,7 +184,7 @@ class _AddressCard extends ConsumerWidget {
                     Flexible(child: Text(address.label, style: const TextStyle(fontWeight: FontWeight.w700))),
                     if (address.isDefault) ...[
                       const SizedBox(width: 8),
-                      const StatusPill(label: 'Default', color: AppColors.violet, background: AppColors.violetSoft),
+                      const StatusPill(label: 'Default', color: AppColors.primary, background: AppColors.primarySoft),
                     ],
                   ],
                 ),

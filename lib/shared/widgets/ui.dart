@@ -82,8 +82,8 @@ class Skeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: const Color(0xFFEAE6F2),
-      highlightColor: const Color(0xFFF7F4FC),
+      baseColor: const Color(0xFFE5EBE6),
+      highlightColor: const Color(0xFFF5F8F5),
       child: Container(
         width: width,
         height: height,
@@ -125,7 +125,7 @@ class AppImage extends StatelessWidget {
       imageUrl: url!,
       fit: fit,
       fadeInDuration: const Duration(milliseconds: 250),
-      placeholder: (_, _) => Container(color: AppColors.violetSoft),
+      placeholder: (_, _) => Container(color: AppColors.primarySoft),
       errorWidget: (_, _, _) => fallback,
     );
   }
@@ -165,7 +165,7 @@ class QuantityStepper extends StatelessWidget {
           width: size,
           height: size,
           child: Material(
-            color: filled ? AppColors.violet : AppColors.violetSoft,
+            color: filled ? AppColors.primary : AppColors.primarySoft,
             shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
@@ -173,7 +173,7 @@ class QuantityStepper extends StatelessWidget {
                 HapticFeedback.lightImpact();
                 onTap();
               },
-              child: Icon(icon, size: compact ? 18 : 20, color: filled ? Colors.white : AppColors.violet),
+              child: Icon(icon, size: compact ? 18 : 20, color: filled ? Colors.white : AppColors.primary),
             ),
           ),
         );
@@ -219,7 +219,7 @@ class RatingBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.star_rounded, size: 15, color: AppColors.mangoDeep),
+          const Icon(Icons.star_rounded, size: 15, color: AppColors.gold),
           const SizedBox(width: 2),
           Text(rating.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
         ],

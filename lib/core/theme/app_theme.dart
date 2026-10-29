@@ -9,11 +9,11 @@ class AppTheme {
 
   static ThemeData light() {
     final scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.violet,
-      primary: AppColors.violet,
+      seedColor: AppColors.primary,
+      primary: AppColors.primary,
       onPrimary: Colors.white,
-      secondary: AppColors.mango,
-      onSecondary: AppColors.ink,
+      secondary: AppColors.accent,
+      onSecondary: Colors.white,
       error: AppColors.danger,
       surface: Colors.white,
       brightness: Brightness.light,
@@ -72,7 +72,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: const BorderSide(color: AppColors.violet, width: 1.6),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -94,14 +94,14 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(50),
           shape: const StadiumBorder(),
-          foregroundColor: AppColors.violet,
+          foregroundColor: AppColors.primary,
           side: const BorderSide(color: AppColors.border, width: 1.4),
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.violet,
+          foregroundColor: AppColors.primary,
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
@@ -110,14 +110,14 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 8,
         height: 66,
-        indicatorColor: AppColors.violetSoft,
+        indicatorColor: AppColors.primarySoft,
         labelTextStyle: WidgetStateProperty.resolveWith((s) => TextStyle(
               fontSize: 12,
               fontWeight: s.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
-              color: s.contains(WidgetState.selected) ? AppColors.violet : AppColors.inkMuted,
+              color: s.contains(WidgetState.selected) ? AppColors.primary : AppColors.inkMuted,
             )),
         iconTheme: WidgetStateProperty.resolveWith((s) => IconThemeData(
-              color: s.contains(WidgetState.selected) ? AppColors.violet : AppColors.inkMuted,
+              color: s.contains(WidgetState.selected) ? AppColors.primary : AppColors.inkMuted,
             )),
       ),
       bottomSheetTheme: const BottomSheetThemeData(

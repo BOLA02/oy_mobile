@@ -52,7 +52,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
             child: Container(
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(color: AppColors.violetSoft, borderRadius: BorderRadius.circular(30)),
+              decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(30)),
               child: Row(
                 children: [
                   _Tab(label: 'Active', selected: _showActive, onTap: () => setState(() => _showActive = true)),
@@ -63,7 +63,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           ),
           Expanded(
             child: RefreshIndicator(
-              color: AppColors.violet,
+              color: AppColors.primary,
               onRefresh: () async {
                 ref.invalidate(ordersProvider);
                 await ref.read(ordersProvider.future);
@@ -140,7 +140,7 @@ class _Tab extends StatelessWidget {
           ),
           child: Text(label,
               textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.w700, color: selected ? AppColors.violet : AppColors.inkMuted)),
+              style: TextStyle(fontWeight: FontWeight.w700, color: selected ? AppColors.primary : AppColors.inkMuted)),
         ),
       ),
     );
@@ -164,7 +164,7 @@ class _OrderCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const CircleAvatar(backgroundColor: AppColors.violetSoft, child: Icon(Icons.storefront_rounded, color: AppColors.violet)),
+              const CircleAvatar(backgroundColor: AppColors.primarySoft, child: Icon(Icons.storefront_rounded, color: AppColors.primary)),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -191,11 +191,11 @@ class _OrderCard extends StatelessWidget {
               Text(formatNaira(order.total), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
               const SizedBox(width: 8),
               if (order.awaitingPayment && order.status == OrderStatus.pending)
-                const StatusPill(label: 'Awaiting payment', color: AppColors.mangoDeep, background: AppColors.cream),
+                const StatusPill(label: 'Awaiting payment', color: AppColors.warning, background: AppColors.cream),
               const Spacer(),
               Text(order.status.isActive ? 'Track order' : 'View details',
-                  style: const TextStyle(color: AppColors.violet, fontWeight: FontWeight.w700)),
-              const Icon(Icons.chevron_right_rounded, color: AppColors.violet),
+                  style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
             ],
           ),
         ],

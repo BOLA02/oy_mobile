@@ -99,7 +99,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
           bottom: _progress < 100 && !_verifying
               ? PreferredSize(
                   preferredSize: const Size.fromHeight(3),
-                  child: LinearProgressIndicator(value: _progress / 100, minHeight: 3, color: AppColors.violet, backgroundColor: AppColors.violetSoft),
+                  child: LinearProgressIndicator(value: _progress / 100, minHeight: 3, color: AppColors.primary, backgroundColor: AppColors.primarySoft),
                 )
               : null,
         ),

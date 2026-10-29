@@ -38,7 +38,7 @@ class WalletScreen extends ConsumerWidget {
         ),
         error: (e, _) => ErrorView(message: '$e', onRetry: () => ref.invalidate(walletProvider)),
         data: (w) => RefreshIndicator(
-          color: AppColors.violet,
+          color: AppColors.primary,
           onRefresh: () async {
             ref.invalidate(walletProvider);
             await ref.read(walletProvider.future);
@@ -116,7 +116,7 @@ class _BalanceCard extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.schedule_rounded, size: 14, color: AppColors.mango),
+                  const Icon(Icons.schedule_rounded, size: 14, color: AppColors.accent),
                   const SizedBox(width: 6),
                   Text('${formatNaira(wallet.pendingPayouts)} on its way to your bank',
                       style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w600)),
@@ -235,9 +235,9 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
               Row(
                 children: [
                   ActionChip(
-                    backgroundColor: AppColors.violetSoft,
-                    labelStyle: const TextStyle(color: AppColors.violet, fontWeight: FontWeight.w700),
-                    avatar: const Icon(Icons.account_balance_wallet_outlined, size: 16, color: AppColors.violet),
+                    backgroundColor: AppColors.primarySoft,
+                    labelStyle: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700),
+                    avatar: const Icon(Icons.account_balance_wallet_outlined, size: 16, color: AppColors.primary),
                     label: const Text('Withdraw all'),
                     onPressed: () => setState(() => _amount.text = widget.wallet.balance.round().toString()),
                   ),
@@ -335,10 +335,10 @@ class _WeekChart extends StatelessWidget {
                                   height: 6 + 74 * f,
                                   decoration: BoxDecoration(
                                     color: d.day.day == today.day && d.day.month == today.month
-                                        ? AppColors.violet
+                                        ? AppColors.primary
                                         : d.amount > 0
-                                            ? AppColors.violetMid.withValues(alpha: 0.45)
-                                            : AppColors.violetSoft,
+                                            ? AppColors.primaryMid.withValues(alpha: 0.45)
+                                            : AppColors.primarySoft,
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                 ),
@@ -375,7 +375,7 @@ class _BankCard extends StatelessWidget {
         children: [
           CircleAvatar(
             backgroundColor: ok ? AppColors.successSoft : AppColors.cream,
-            child: Icon(Icons.account_balance_rounded, color: ok ? AppColors.success : AppColors.mangoDeep),
+            child: Icon(Icons.account_balance_rounded, color: ok ? AppColors.success : AppColors.warning),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -393,7 +393,7 @@ class _BankCard extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
                       pendingVerification ? 'Waiting for verification' : 'Contact support to add your bank account',
-                      style: const TextStyle(color: AppColors.mangoDeep, fontSize: 12.5, fontWeight: FontWeight.w600),
+                      style: const TextStyle(color: AppColors.warning, fontSize: 12.5, fontWeight: FontWeight.w600),
                     ),
                   ),
               ],
@@ -418,8 +418,8 @@ class _TxTile extends StatelessWidget {
     final color = failed ? AppColors.danger : (credit ? AppColors.success : AppColors.ink);
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: credit ? AppColors.successSoft : AppColors.violetSoft,
-        child: Icon(credit ? Icons.south_west_rounded : Icons.north_east_rounded, color: credit ? AppColors.success : AppColors.violet, size: 20),
+        backgroundColor: credit ? AppColors.successSoft : AppColors.primarySoft,
+        child: Icon(credit ? Icons.south_west_rounded : Icons.north_east_rounded, color: credit ? AppColors.success : AppColors.primary, size: 20),
       ),
       title: Text(tx.description.isEmpty ? (credit ? 'Earning' : 'Withdrawal') : tx.description,
           maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
@@ -434,7 +434,7 @@ class _TxTile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 3),
               child: Text(failed ? 'Failed' : 'Pending',
-                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: failed ? AppColors.danger : AppColors.mangoDeep)),
+                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: failed ? AppColors.danger : AppColors.warning)),
             ),
         ],
       ),

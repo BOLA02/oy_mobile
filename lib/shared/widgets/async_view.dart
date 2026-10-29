@@ -60,8 +60,8 @@ class EmptyView extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundColor: AppColors.violetSoft,
-              child: Icon(icon, color: AppColors.violet, size: 28),
+              backgroundColor: AppColors.primarySoft,
+              child: Icon(icon, color: AppColors.primary, size: 28),
             ),
             const SizedBox(height: 14),
             Text(title, style: Theme.of(context).textTheme.titleMedium),

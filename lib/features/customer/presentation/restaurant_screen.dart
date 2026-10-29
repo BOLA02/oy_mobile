@@ -278,11 +278,11 @@ class _Fact extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(color: AppColors.violetSoft, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: AppColors.violet),
+          Icon(icon, size: 16, color: AppColors.primary),
           const SizedBox(width: 6),
           Text(text, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
         ],
@@ -330,12 +330,12 @@ class _CategoryBarDelegate extends SliverPersistentHeaderDelegate {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: selected ? AppColors.violet : AppColors.violetSoft,
+                color: selected ? AppColors.primary : AppColors.primarySoft,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(c,
                   style: TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 13, color: selected ? Colors.white : AppColors.violet)),
+                      fontWeight: FontWeight.w700, fontSize: 13, color: selected ? Colors.white : AppColors.primary)),
             ),
           );
         },
@@ -379,7 +379,7 @@ class _MenuTile extends ConsumerWidget {
                 ],
                 const SizedBox(height: 10),
                 Text(formatNaira(item.price),
-                    style: const TextStyle(color: AppColors.violet, fontWeight: FontWeight.w800, fontSize: 15)),
+                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: 15)),
               ],
             ),
           ),
@@ -411,13 +411,13 @@ class _MenuTile extends ConsumerWidget {
                               HapticFeedback.lightImpact();
                               await addWithConfirm(context, ref, restaurant, item);
                             },
-                            child: const SizedBox(width: 36, height: 36, child: Icon(Icons.add_rounded, color: AppColors.violet)),
+                            child: const SizedBox(width: 36, height: 36, child: Icon(Icons.add_rounded, color: AppColors.primary)),
                           ),
                         )
                       : Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: AppColors.violet,
+                            color: AppColors.primary,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: AppShadows.pop,
                           ),
@@ -533,7 +533,7 @@ class _AddToCartSheetState extends ConsumerState<_AddToCartSheet> {
             const SizedBox(height: 18),
             Row(
               children: [
-                Text(formatNaira(item.price), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.violet)),
+                Text(formatNaira(item.price), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.primary)),
                 const Spacer(),
                 QuantityStepper(
                   quantity: _qty,

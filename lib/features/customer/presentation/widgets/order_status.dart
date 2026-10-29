@@ -6,17 +6,17 @@ import '../../domain/order.dart';
 
 extension OrderStatusStyle on OrderStatus {
   Color get color => switch (this) {
-        OrderStatus.pending => AppColors.mangoDeep,
+        OrderStatus.pending => AppColors.warning,
         OrderStatus.delivered => AppColors.success,
         OrderStatus.cancelled => AppColors.danger,
-        _ => AppColors.violet,
+        _ => AppColors.primary,
       };
 
   Color get background => switch (this) {
         OrderStatus.pending => AppColors.cream,
         OrderStatus.delivered => AppColors.successSoft,
         OrderStatus.cancelled => AppColors.dangerSoft,
-        _ => AppColors.violetSoft,
+        _ => AppColors.primarySoft,
       };
 }
 
@@ -42,7 +42,7 @@ class OrderProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final current = status.step;
-    final on = onDark ? AppColors.mango : AppColors.violet;
+    final on = onDark ? AppColors.accent : AppColors.primary;
     final off = onDark ? Colors.white.withValues(alpha: 0.25) : AppColors.border;
     final text = onDark ? Colors.white : AppColors.ink;
 
@@ -65,7 +65,7 @@ class OrderProgress extends StatelessWidget {
                         color: i <= current ? on : off,
                       ),
                       child: i <= current
-                          ? Icon(Icons.check_rounded, size: 15, color: onDark ? AppColors.ink : Colors.white)
+                          ? Icon(Icons.check_rounded, size: 15, color: Colors.white)
                           : null,
                     ),
                     Expanded(

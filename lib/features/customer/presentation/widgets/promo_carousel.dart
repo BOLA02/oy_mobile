@@ -73,7 +73,7 @@ class _PromoCarouselState extends State<PromoCarousel> {
                   width: i == _page ? 20 : 6,
                   height: 6,
                   decoration: BoxDecoration(
-                    color: i == _page ? AppColors.violet : AppColors.border,
+                    color: i == _page ? AppColors.primary : AppColors.border,
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
@@ -123,7 +123,7 @@ class _Banner extends StatelessWidget {
               child: Container(
                 width: 110,
                 height: 110,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.mango.withValues(alpha: 0.18)),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.accent.withValues(alpha: 0.18)),
               ),
             ),
             if (p?.imageUrl != null)
@@ -144,7 +144,7 @@ class _Banner extends StatelessWidget {
                 children: [
                   Text('OYAEAT',
                       style: TextStyle(
-                          color: AppColors.mango, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 2)),
+                          color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 2)),
                   const SizedBox(height: 6),
                   Text(title,
                       maxLines: 2,
@@ -162,9 +162,9 @@ class _Banner extends StatelessWidget {
                     const SizedBox(height: 10),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                      decoration: BoxDecoration(color: AppColors.mango, borderRadius: BorderRadius.circular(20)),
+                      decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(20)),
                       child: const Text('Order now',
-                          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5, color: AppColors.ink)),
+                          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5, color: Colors.white)),
                     ),
                   ],
                 ],

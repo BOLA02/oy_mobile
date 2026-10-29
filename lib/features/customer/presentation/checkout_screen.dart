@@ -226,8 +226,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             child: Row(
                               children: [
                                 const CircleAvatar(
-                                  backgroundColor: AppColors.violetSoft,
-                                  child: Icon(Icons.location_on_rounded, color: AppColors.violet),
+                                  backgroundColor: AppColors.primarySoft,
+                                  child: Icon(Icons.location_on_rounded, color: AppColors.primary),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -240,7 +240,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                     ],
                                   ),
                                 ),
-                                const Text('Change', style: TextStyle(color: AppColors.violet, fontWeight: FontWeight.w700)),
+                                const Text('Change', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
                               ],
                             ),
                           ),
@@ -251,7 +251,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               decoration: BoxDecoration(color: AppColors.cream, borderRadius: BorderRadius.circular(AppRadius.md)),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.info_outline_rounded, size: 18, color: AppColors.mangoDeep),
+                                  const Icon(Icons.info_outline_rounded, size: 18, color: AppColors.warning),
                                   const SizedBox(width: 8),
                                   const Expanded(
                                     child: Text('Pin your location for an exact delivery fee.', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
@@ -329,7 +329,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${l.quantity}×', style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.violet)),
+                          Text('${l.quantity}×', style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary)),
                           const SizedBox(width: 10),
                           Expanded(child: Text(l.item.name)),
                           Text(formatNaira(l.total), style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -421,12 +421,12 @@ class _MethodTile extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: selected ? AppColors.violet : AppColors.border, width: selected ? 1.8 : 1),
-          color: selected ? AppColors.violetSoft : Colors.white,
+          border: Border.all(color: selected ? AppColors.primary : AppColors.border, width: selected ? 1.8 : 1),
+          color: selected ? AppColors.primarySoft : Colors.white,
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.violet),
+            Icon(icon, color: AppColors.primary),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -438,7 +438,7 @@ class _MethodTile extends StatelessWidget {
               ),
             ),
             Icon(selected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
-                color: selected ? AppColors.violet : AppColors.inkFaint),
+                color: selected ? AppColors.primary : AppColors.inkFaint),
           ],
         ),
       ),

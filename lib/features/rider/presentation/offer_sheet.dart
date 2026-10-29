@@ -94,7 +94,7 @@ class _OfferSheetState extends ConsumerState<OfferSheet> with SingleTickerProvid
             children: [
               Row(
                 children: [
-                  const StatusPill(label: 'New delivery request', color: AppColors.mangoDeep, background: AppColors.cream),
+                  const StatusPill(label: 'New delivery request', color: AppColors.warning, background: AppColors.cream),
                   const Spacer(),
                   AnimatedBuilder(
                     animation: _clock,
@@ -113,8 +113,8 @@ class _OfferSheetState extends ConsumerState<OfferSheet> with SingleTickerProvid
                   child: LinearProgressIndicator(
                     value: 1 - _clock.value,
                     minHeight: 5,
-                    color: _clock.value > 0.78 ? AppColors.danger : AppColors.violet,
-                    backgroundColor: AppColors.violetSoft,
+                    color: _clock.value > 0.78 ? AppColors.danger : AppColors.primary,
+                    backgroundColor: AppColors.primarySoft,
                   ),
                 ),
               ),
@@ -165,7 +165,7 @@ class _Stop extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 24, color: AppColors.violet),
+        Icon(icon, size: 24, color: AppColors.primary),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -177,7 +177,7 @@ class _Stop extends StatelessWidget {
           ),
         ),
         if (trailing != null)
-          Text(trailing!, style: const TextStyle(color: AppColors.violet, fontWeight: FontWeight.w700, fontSize: 13)),
+          Text(trailing!, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 13)),
       ],
     );
   }

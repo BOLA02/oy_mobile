@@ -66,7 +66,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          icon: const Icon(Icons.mark_email_read_outlined, color: AppColors.violet, size: 36),
+          icon: const Icon(Icons.mark_email_read_outlined, color: AppColors.primary, size: 36),
           title: const Text('Check your email'),
           content: const Text(
             "If that address is registered, we've sent a link to reset your password. "

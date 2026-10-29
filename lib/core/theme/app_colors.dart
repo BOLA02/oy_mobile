@@ -1,36 +1,49 @@
 import 'package:flutter/material.dart';
 
-/// OyaEat palette, mirroring the web design system (violet + mango).
-/// Mango is scarce: one key action per screen, plus ratings and promos.
+/// OyaEat palette, taken from the logo: deep green and orange.
+///
+///  * green is the brand: headers, selected states, links, success
+///  * orange is the one main action per screen (Order, Accept, Pay)
+///  * gold is only for rating stars; amber-brown is for warnings
 class AppColors {
   const AppColors._();
 
-  /// The two colours of the OyaEat logo.
+  /// The two colours exactly as drawn in the logo.
   static const brandGreen = Color(0xFF066432);
   static const brandOrange = Color(0xFFFC6504);
 
-  static const violet = Color(0xFF5B21B6);
-  static const violetDeep = Color(0xFF2A1156);
-  static const violetMid = Color(0xFF7C3AED);
-  static const violetSoft = Color(0xFFF1EBFF);
-  static const mango = Color(0xFFFDBA2D);
-  static const mangoDeep = Color(0xFFD97F06);
-  static const cream = Color(0xFFFFF4D6);
-  static const ink = Color(0xFF1A1033);
-  static const inkMuted = Color(0xFF6B6480);
-  static const inkFaint = Color(0xFFA29BB5);
+  // Brand (green)
+  static const primary = brandGreen;
+  static const primaryDeep = Color(0xFF03381C);
+  static const primaryMid = Color(0xFF138A4B);
+  static const primarySoft = Color(0xFFE6F2EA);
+
+  /// Orange for actions. A touch deeper than the logo orange so white text on it
+  /// stays readable.
+  static const accent = Color(0xFFF25F00);
+  static const accentSoft = Color(0xFFFFEDE0);
+
+  static const gold = Color(0xFFF5A524);
+  static const warning = Color(0xFFB45309);
+  static const cream = Color(0xFFFFF1E4);
+
+  static const ink = Color(0xFF10231A);
+  static const inkMuted = Color(0xFF5F7066);
+  static const inkFaint = Color(0xFF9AA79F);
+
   static const success = Color(0xFF15803D);
   static const successSoft = Color(0xFFDCFCE7);
   static const danger = Color(0xFFC8372D);
   static const dangerSoft = Color(0xFFFDECEA);
-  static const border = Color(0xFFEAE4F7);
-  static const background = Color(0xFFF8F6FC);
+
+  static const border = Color(0xFFE2EAE4);
+  static const background = Color(0xFFF6F8F5);
   static const surface = Colors.white;
 
   static const brandGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [violetMid, violetDeep],
+    colors: [primaryMid, primaryDeep],
   );
 }
 
@@ -60,7 +73,7 @@ class AppShadows {
 
   static final card = [
     BoxShadow(
-      color: const Color(0xFF2A1156).withValues(alpha: 0.07),
+      color: const Color(0xFF0B2A1A).withValues(alpha: 0.07),
       blurRadius: 18,
       offset: const Offset(0, 6),
     ),
@@ -68,7 +81,7 @@ class AppShadows {
 
   static final pop = [
     BoxShadow(
-      color: const Color(0xFF2A1156).withValues(alpha: 0.16),
+      color: const Color(0xFF0B2A1A).withValues(alpha: 0.16),
       blurRadius: 28,
       offset: const Offset(0, 10),
     ),

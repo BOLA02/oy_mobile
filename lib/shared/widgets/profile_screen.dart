@@ -29,8 +29,8 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 CircleAvatar(
                   radius: 32,
-                  backgroundColor: AppColors.mango,
-                  child: Icon(Icons.two_wheeler_rounded, size: 30, color: AppColors.ink.withValues(alpha: 0.9)),
+                  backgroundColor: AppColors.accent,
+                  child: Icon(Icons.two_wheeler_rounded, size: 30, color: Colors.white),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

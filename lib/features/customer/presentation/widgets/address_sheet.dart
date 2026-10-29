@@ -99,12 +99,12 @@ class _AddressTile extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: selected ? AppColors.violet : AppColors.border, width: selected ? 1.8 : 1),
-          color: selected ? AppColors.violetSoft : Colors.white,
+          border: Border.all(color: selected ? AppColors.primary : AppColors.border, width: selected ? 1.8 : 1),
+          color: selected ? AppColors.primarySoft : Colors.white,
         ),
         child: Row(
           children: [
-            Icon(address.label.toLowerCase() == 'work' ? Icons.work_outline_rounded : Icons.home_outlined, color: AppColors.violet),
+            Icon(address.label.toLowerCase() == 'work' ? Icons.work_outline_rounded : Icons.home_outlined, color: AppColors.primary),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -115,7 +115,7 @@ class _AddressTile extends StatelessWidget {
                       Text(address.label, style: const TextStyle(fontWeight: FontWeight.w700)),
                       if (address.isDefault) ...[
                         const SizedBox(width: 8),
-                        const StatusPill(label: 'Default', color: AppColors.violet, background: AppColors.violetSoft),
+                        const StatusPill(label: 'Default', color: AppColors.primary, background: AppColors.primarySoft),
                       ],
                     ],
                   ),
@@ -125,12 +125,12 @@ class _AddressTile extends StatelessWidget {
                     const Padding(
                       padding: EdgeInsets.only(top: 4),
                       child: Text('No map pin: delivery fee is an estimate',
-                          style: TextStyle(color: AppColors.mangoDeep, fontSize: 11.5, fontWeight: FontWeight.w600)),
+                          style: TextStyle(color: AppColors.warning, fontSize: 11.5, fontWeight: FontWeight.w600)),
                     ),
                 ],
               ),
             ),
-            if (selected) const Icon(Icons.check_circle_rounded, color: AppColors.violet),
+            if (selected) const Icon(Icons.check_circle_rounded, color: AppColors.primary),
           ],
         ),
       ),
@@ -220,7 +220,7 @@ class _AddAddressFormState extends ConsumerState<_AddAddressForm> {
                       ChoiceChip(
                         label: Text(l),
                         selected: _label == l,
-                        selectedColor: AppColors.violet,
+                        selectedColor: AppColors.primary,
                         labelStyle: TextStyle(color: _label == l ? Colors.white : AppColors.ink, fontWeight: FontWeight.w700),
                         showCheckmark: false,
                         onSelected: (_) => setState(() => _label = l),

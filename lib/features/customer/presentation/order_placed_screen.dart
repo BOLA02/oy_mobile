@@ -55,10 +55,10 @@ class OrderPlacedScreen extends ConsumerWidget {
                   const SizedBox(height: 18),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                    decoration: BoxDecoration(color: AppColors.violetSoft, borderRadius: BorderRadius.circular(AppRadius.md)),
+                    decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(AppRadius.md)),
                     child: Text(
                       '${order.itemCount} item${order.itemCount == 1 ? '' : 's'} · ${formatNaira(order.total)} · ${order.isPaidOnline ? 'Paid' : 'Pay on delivery'}',
-                      style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.violet),
+                      style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary),
                     ),
                   ).animate().fadeIn(delay: 450.ms),
                 ],

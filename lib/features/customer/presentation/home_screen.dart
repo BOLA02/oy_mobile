@@ -46,7 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
-          color: AppColors.violet,
+          color: AppColors.primary,
           onRefresh: _refresh,
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -70,7 +70,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       IconButton.filledTonal(
                         onPressed: () => context.push('/c/favorites'),
                         style: IconButton.styleFrom(backgroundColor: Colors.white),
-                        icon: const Icon(Icons.favorite_border_rounded, color: AppColors.violet),
+                        icon: const Icon(Icons.favorite_border_rounded, color: AppColors.primary),
                         tooltip: 'Favourites',
                       ),
                       const SizedBox(width: 4),
@@ -82,9 +82,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           icon: Badge(
                             isLabelVisible: count > 0,
                             label: Text('$count'),
-                            backgroundColor: AppColors.mango,
-                            textColor: AppColors.ink,
-                            child: const Icon(Icons.shopping_bag_outlined, color: AppColors.violet),
+                            backgroundColor: AppColors.accent,
+                            textColor: Colors.white,
+                            child: const Icon(Icons.shopping_bag_outlined, color: AppColors.primary),
                           ),
                           tooltip: 'Cart',
                         );
@@ -287,7 +287,7 @@ class _CuisineChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: selected ? AppColors.violet : Colors.white,
+          color: selected ? AppColors.primary : Colors.white,
           borderRadius: BorderRadius.circular(30),
           boxShadow: selected ? null : AppShadows.card,
         ),

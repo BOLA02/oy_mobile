@@ -110,7 +110,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
             return const EmptyView(icon: Icons.search_off_rounded, title: 'Order not found');
           }
           return RefreshIndicator(
-            color: AppColors.violet,
+            color: AppColors.primary,
             onRefresh: () async {
               ref.invalidate(ordersProvider);
               await ref.read(ordersProvider.future);
@@ -130,7 +130,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                     decoration: BoxDecoration(color: AppColors.cream, borderRadius: BorderRadius.circular(AppRadius.md)),
                     child: const Row(
                       children: [
-                        Icon(Icons.info_outline_rounded, color: AppColors.mangoDeep),
+                        Icon(Icons.info_outline_rounded, color: AppColors.warning),
                         SizedBox(width: 10),
                         Expanded(child: Text('We have not received your online payment for this order.', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13))),
                       ],
@@ -150,7 +150,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('${l.quantity}×', style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.violet)),
+                              Text('${l.quantity}×', style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary)),
                               const SizedBox(width: 10),
                               Expanded(child: Text(l.name)),
                               Text(formatNaira(l.total), style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -194,7 +194,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                         const Text('Your rating', style: TextStyle(fontWeight: FontWeight.w700)),
                         const Spacer(),
                         for (var i = 1; i <= 5; i++)
-                          Icon(i <= order.reviewRating! ? Icons.star_rounded : Icons.star_outline_rounded, color: AppColors.mango, size: 26),
+                          Icon(i <= order.reviewRating! ? Icons.star_rounded : Icons.star_outline_rounded, color: AppColors.gold, size: 26),
                       ],
                     ),
                   ),
@@ -271,7 +271,7 @@ class _RiderCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const CircleAvatar(radius: 24, backgroundColor: AppColors.violetSoft, child: Icon(Icons.two_wheeler_rounded, color: AppColors.violet)),
+              const CircleAvatar(radius: 24, backgroundColor: AppColors.primarySoft, child: Icon(Icons.two_wheeler_rounded, color: AppColors.primary)),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -298,12 +298,12 @@ class _RiderCard extends ConsumerWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(color: AppColors.violetSoft, borderRadius: BorderRadius.circular(AppRadius.md)),
+            decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(AppRadius.md)),
             child: Row(
               children: [
-                const Icon(Icons.near_me_rounded, size: 18, color: AppColors.violet),
+                const Icon(Icons.near_me_rounded, size: 18, color: AppColors.primary),
                 const SizedBox(width: 8),
-                Text(distance ?? 'Your rider is on the way', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.violet)),
+                Text(distance ?? 'Your rider is on the way', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary)),
               ],
             ),
           ),
@@ -342,7 +342,7 @@ class _Info extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: AppColors.violet),
+        Icon(icon, size: 20, color: AppColors.primary),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -395,7 +395,7 @@ class _ReviewSheetState extends State<_ReviewSheet> {
                     IconButton(
                       iconSize: 40,
                       onPressed: () => setState(() => _rating = i),
-                      icon: Icon(i <= _rating ? Icons.star_rounded : Icons.star_outline_rounded, color: AppColors.mango),
+                      icon: Icon(i <= _rating ? Icons.star_rounded : Icons.star_outline_rounded, color: AppColors.gold),
                     ),
                 ],
               ),
