@@ -70,9 +70,10 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-    - assets/brand/logo.png
-    - assets/brand/logo_white.png
-    - assets/brand/icon_fg.png
+    - assets/brand/logo_full.png
+    - assets/brand/logo_mark.png
+    - assets/brand/logo_wordmark.png
+    - assets/brand/logo_tagline.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -119,12 +120,11 @@ flutter_launcher_icons:
   adaptive_icon_background: "assets/brand/icon_bg.png"
   adaptive_icon_foreground: "assets/brand/icon_fg.png"
 
-# The splash shown by the OS before Flutter starts. It matches the animated
-# in-app splash (lib/features/splash) so there is no white flash between them.
+# What the OS shows before Flutter starts: plain white. The logo itself animates
+# in from lib/features/splash, so a static native logo would only fight it.
 flutter_native_splash:
-  color: "#2A1156"
-  image: assets/brand/icon_fg.png
+  color: "#FFFFFF"
   android_12:
-    color: "#2A1156"
-    image: assets/brand/icon_fg.png
-    icon_background_color: "#2A1156"
+    color: "#FFFFFF"
+    image: assets/brand/splash_blank.png
+    icon_background_color: "#FFFFFF"

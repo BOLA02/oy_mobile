@@ -58,12 +58,12 @@ void main() {
     await _wait(tester, const Duration(milliseconds: 500));
 
     // Splash: the saved session is already read, but the animation still holds the screen.
-    expect(find.text('Better chow, no wahala.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('splash')), findsOneWidget);
     expect(find.text('Welcome back'), findsNothing);
 
     await _wait(tester, const Duration(seconds: 3));
     expect(find.text('Welcome back'), findsOneWidget);
-    expect(find.text('Better chow, no wahala.'), findsNothing);
+    expect(find.byKey(const ValueKey('splash')), findsNothing);
   });
 
   testWidgets('a saved rider session skips login and lands on deliveries', (tester) async {

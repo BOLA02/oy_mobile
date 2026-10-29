@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 class AppColors {
   const AppColors._();
 
+  /// The two colours of the OyaEat logo.
+  static const brandGreen = Color(0xFF066432);
+  static const brandOrange = Color(0xFFFC6504);
+
   static const violet = Color(0xFF5B21B6);
   static const violetDeep = Color(0xFF2A1156);
   static const violetMid = Color(0xFF7C3AED);

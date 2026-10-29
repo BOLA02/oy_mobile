@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -83,132 +84,83 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: AppColors.violetDeep,
-      body: Column(
-        children: [
-          // ── Brand header ──
-          SizedBox(
-            height: 250,
-            width: double.infinity,
-            child: Stack(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.brandGradient))),
-                Positioned(
-                  right: -50,
-                  top: -30,
-                  child: Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.07)),
-                  ),
+                // The logo is drawn for a light background, so the whole screen is light.
+                Center(
+                  child: Image.asset('assets/brand/logo_full.png', height: 200, fit: BoxFit.contain, semanticLabel: 'OyaEat. Great food. Delivered.'),
                 ),
-                Positioned(
-                  left: -40,
-                  bottom: 10,
-                  child: Container(
-                    width: 130,
-                    height: 130,
-                    decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.mango.withValues(alpha: 0.16)),
-                  ),
-                ),
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(28, 30, 28, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.asset('assets/brand/logo_white.png', height: 58, fit: BoxFit.contain, alignment: Alignment.centerLeft),
-                        const SizedBox(height: 26),
-                        Text('Better chow,\nno wahala.',
-                            style: theme.textTheme.headlineLarge?.copyWith(color: Colors.white, fontSize: 34)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // ── Form sheet ──
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-              ),
-              child: SafeArea(
-                top: false,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 16),
+                const SizedBox(height: 20),
+                Text('Welcome back', style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 4),
+                const Text('Log in to order food or start delivering.', style: TextStyle(color: AppColors.inkMuted)),
+                const SizedBox(height: 22),
+                Form(
+                  key: _form,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text('Welcome back', style: theme.textTheme.headlineSmall),
-                      const SizedBox(height: 4),
-                      const Text('Log in to order food or start delivering.', style: TextStyle(color: AppColors.inkMuted)),
-                      const SizedBox(height: 22),
-                      Form(
-                        key: _form,
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              controller: _identifier,
-                              keyboardType: TextInputType.emailAddress,
-                              textInputAction: TextInputAction.next,
-                              autocorrect: false,
-                              autofillHints: const [AutofillHints.username],
-                              decoration: const InputDecoration(
-                                labelText: 'Email or phone',
-                                prefixIcon: Icon(Icons.person_outline_rounded),
-                              ),
-                              validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                            ),
-                            const SizedBox(height: 14),
-                            TextFormField(
-                              controller: _password,
-                              obscureText: _obscure,
-                              autofillHints: const [AutofillHints.password],
-                              onFieldSubmitted: (_) => _submit(),
-                              decoration: InputDecoration(
-                                labelText: 'Password',
-                                prefixIcon: const Icon(Icons.lock_outline_rounded),
-                                suffixIcon: IconButton(
-                                  icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined),
-                                  onPressed: () => setState(() => _obscure = !_obscure),
-                                ),
-                              ),
-                              validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
-                            ),
-                          ],
+                      TextFormField(
+                        controller: _identifier,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        autocorrect: false,
+                        autofillHints: const [AutofillHints.username],
+                        decoration: const InputDecoration(
+                          labelText: 'Email or phone',
+                          prefixIcon: Icon(Icons.person_outline_rounded),
                         ),
+                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                       ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(onPressed: _forgotPassword, child: const Text('Forgot password?')),
-                      ),
-                      const SizedBox(height: 4),
-                      CtaButton(label: 'Log in', loading: _loading, onPressed: _submit),
-                      const SizedBox(height: 22),
-                      Row(
-                        children: const [
-                          Expanded(child: Divider()),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12),
-                            child: Text('New to OyaEat?', style: TextStyle(color: AppColors.inkMuted, fontSize: 13)),
+                      const SizedBox(height: 14),
+                      TextFormField(
+                        controller: _password,
+                        obscureText: _obscure,
+                        autofillHints: const [AutofillHints.password],
+                        onFieldSubmitted: (_) => _submit(),
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: const Icon(Icons.lock_outline_rounded),
+                          suffixIcon: IconButton(
+                            icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                            onPressed: () => setState(() => _obscure = !_obscure),
                           ),
-                          Expanded(child: Divider()),
-                        ],
+                        ),
+                        validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
                       ),
-                      const SizedBox(height: 16),
-                      OutlinedButton(onPressed: () => context.push('/join'), child: const Text('Create an account')),
                     ],
                   ),
                 ),
-              ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(onPressed: _forgotPassword, child: const Text('Forgot password?')),
+                ),
+                const SizedBox(height: 4),
+                CtaButton(label: 'Log in', loading: _loading, onPressed: _submit),
+                const SizedBox(height: 22),
+                Row(
+                  children: const [
+                    Expanded(child: Divider()),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('New to OyaEat?', style: TextStyle(color: AppColors.inkMuted, fontSize: 13)),
+                    ),
+                    Expanded(child: Divider()),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(onPressed: () => context.push('/join'), child: const Text('Create an account')),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
